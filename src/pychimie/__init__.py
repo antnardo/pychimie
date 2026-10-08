@@ -3,5 +3,16 @@
 from pychimie.donnees import DonneesThermo, TableThermo, table_thermo
 from pychimie.equation import Constituant, Equation
 from pychimie.reaction import Reaction
+from pychimie.systeme import EtatFinal, RuptureEquilibre, Systeme
 
-__all__ = ["Constituant", "DonneesThermo", "Equation", "Reaction", "TableThermo", "table_thermo"]
+__all__ = [
+    "Constituant",
+    "DonneesThermo",
+    "Equation",
+    "EtatFinal",
+    "Reaction",
+    "RuptureEquilibre",
+    "Systeme",
+    "TableThermo",
+    "table_thermo",
+]

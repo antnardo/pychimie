@@ -15,8 +15,8 @@ from pychimie import Reaction, Systeme, perturber
 
 nh3 = Reaction("N2(g) + 3 H2(g) = 2 NH3(g)", DrH0=-92.2e3, DrS0=-198.8)  # J/mol, J/K/mol
 s = Systeme(nh3, {"N2": 1, "H2": 3}, T=700, P=200)  # mol, K, bar
-s.xi_eq()                 # 0.5774 mol
-xi = s.avancements()      # ξ entre ξ_min et ξ_max, bornes exclues
+s.xi_eq()  # 0.5774 mol
+xi = s.avancements()  # ξ entre ξ_min et ξ_max, bornes exclues
 s.Q(xi), s.DrG(xi), s.G(xi)
 perturber(s, P=300).sens  # +1 : une hausse de P déplace vers NH₃
 ```

@@ -8,3 +8,10 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+# artefacts LaTeX des exemples
+*.aux
+*.log
+*.out
+*.pytxcode
+*.synctex.gz
+*.pdf

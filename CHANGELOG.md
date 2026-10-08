@@ -7,6 +7,7 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
 
 ### Ajouté
 
+- Licences : MIT pour le code, CC BY-NC-SA 4.0 pour les exemples.
 - Équilibres chimiques, en remplacement de `chimie/thermochimie.py` :
   - `Equation` lit une équation écrite en texte, phases comprises ;
   - `Reaction` : K°(T) en approximation d'Ellingham ou avec Kirchhoff (ΔrC°p

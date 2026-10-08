@@ -147,3 +147,11 @@ pgf-PeriodicTable, `schema_categories` et `schema_degrade` écrivent un
 uv run python scripts/telecharger_ciaaw.py
 uv run --group donnees python scripts/generer_elements.py
 ```
+
+## Licence
+
+Le code — le paquet (`src/`), les tests et les scripts — est sous licence MIT
+(`LICENSE`). Les exemples (`exemples/`), qui sont du contenu scientifique et
+pédagogique plutôt que des algorithmes, sont sous licence Creative Commons
+Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0
+International, CC BY-NC-SA 4.0 (`LICENSE-CC-BY-NC-SA-4.0`).

@@ -1,0 +1,17 @@
+%!TEX TS-program = lualatex
+%!TEX encoding = UTF-8
+% Deux tableaux de pgf-PeriodicTable colorés par pychimie : électronégativité de
+% Pauling (du rouge au bleu, gris sans valeur) et familles.
+%     python pgf_electronegativite.py && lualatex Tableau_pgf_electronegativite.tex
+\documentclass{article}
+\usepackage[a4paper, landscape, margin=1cm]{geometry}
+\usepackage[fr]{pgf-PeriodicTable}
+\input{schemas_pgfpt}
+\pagestyle{empty}
+
+\begin{document}
+\centering
+\pgfPT[back color scheme=chi, show title=false, show legend=false]
+\newpage
+\pgfPT[back color scheme=familles, show title=false, show legend=false]
+\end{document}

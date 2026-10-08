@@ -1,0 +1,117 @@
+%!TEX TS-program = PGF
+%!TEX encoding = UTF-8
+\documentclass{standalone}
+\input{tikzstandalone}
+\usepackage{hyperref}
+\usepackage{pythontex}
+
+\hypersetup{
+        colorlinks = false,
+	urlbordercolor = .1 .1 1,
+	pdfborderstyle={/S/U/W 1} % liens soulignés, ne marche qu'avec acrobat
+}
+
+
+\newcommand\dessinecase[2][]{\draw[#1] (#2) ++(-.48, -.48) rectangle ++(.96, .96);}
+
+\def\larg{1cm}
+\def\haut{1cm}
+\def\xoriginlanth{3.5}
+\def\yoriginlanth{-1}
+
+\sisetup{
+round-mode = places, %pour contrôler le round-precision
+%round-precision = 3
+}
+
+
+\begin{document}
+%\begin{pycode}
+%from chimie.periodikz import Tikz
+%T = Tikz()
+%
+%T.add_symboles(with_style=['etat'])
+%T.add_cases(with_style=['metal'])
+%T.add_info(attr='chi', style='info1', format='$\\chi=\\num{{{}}}$')
+%T.export('atomes2.tex')
+%\end{pycode}
+
+\fontfamily{cmr}
+% helvetica : phv
+% times : ptm
+% latex : cmr
+\fontsize{9}{10}\selectfont %default 10 12
+%{size}{baselineskip} baseline-skip should be set to roughly 1.2x the font size
+
+
+\begin{tikzpicture}[x=\larg, y=\haut,
+	etat/.is choice,
+	etat/g/.style={text=red!80!white},
+	etat/l/.style={text=blue!80!white},
+	etat/s/.style={black},
+	groupe/.is choice,
+	groupe/alcalin/.style={fill=red!50!white},
+	groupe/alcalino-terreux/.style={fill=yellow!80!black},
+	groupe/chalcogène/.style={},
+	groupe/halogène/.style={fill=yellow!80!white!90!red},
+	groupe/gaz noble/.style={fill=blue!20!white!90!green},
+	groupe/lanthanide/.style={fill=red!20!white!95!blue},
+	groupe/actinide/.style={fill=red!30!white},
+	groupe/no/.style={},
+	bloc/.is choice,
+	bloc/s/.style={},
+	bloc/p/.style={},
+	bloc/d/.style={},
+	bloc/f/.style={},
+	origine/.is choice,
+	origine/primordial/.style={},
+	origine/désintégration/.style={},
+	origine/synthétique/.style={},
+	chi/.style={},
+	radioactif/.style={},
+	discovery/.style={},
+	metal/.is choice,
+	metal/no/.style={},
+	metal/autre/.style={fill=green!80!yellow!70!blue!60!white},
+	metal/alcalin/.style={fill=red!50!white},
+	metal/alcalino-terreux/.style={fill=yellow!80!black},
+	metal/métalloïde/.style={fill=red!25!green!70!blue!25!gray},
+	metal/métal pauvre/.style={fill=gray!60!white},
+	metal/métal de transition/.style={fill=red!20!white},
+	metal/lanthanide/.style={fill=red!20!white!95!blue},
+	metal/actinide/.style={fill=red!30!white},
+	metal/unknown/.style={fill=white},
+	titre colonne/.style={gray, scale=.7, node font={\itshape\footnotesize}, yshift=-.4\haut},
+	titre ligne/.style={gray, scale=.7, node font={\itshape\footnotesize}, xshift=.4\larg},
+	symbole/.style={node font={\bfseries\normalsize}, yshift=.05\haut},
+	chi info/.style={right, node font={\tiny}, yshift=-.3\haut, xshift=-.5\larg},
+	M info/.style={node font={\tiny}, yshift=-.3\haut, },
+%	M info/.style={right, node font={\tiny}, yshift=-.3\haut, xshift=-.5\larg},
+	nom/.style={scale=.7, node font={\tiny}, yshift=.5\haut, text centered},
+	Z/.style={node font={\bfseries\tiny}, yshift=.2\haut, xshift=.3\larg}
+]
+
+\foreach \col in {1,...,18} {
+	\foreach \ligne in {1,...,7} {
+		\draw (\col, 7-\ligne) coordinate(\col-\ligne); %définit pour plus tard
+	}
+}
+
+% titres
+\foreach \col in {1,18} \draw (\col, 7) node[titre colonne]{\col};
+\foreach \col in {2, 13, 14, 15, 16, 17} \draw (\col, 6) node[titre colonne]{\col};
+\foreach \col in {3, ..., 12} \draw (\col, 4) node[titre colonne]{\col};
+\foreach \ligne in {1,...,7} \draw (0, {(7-\ligne)}) node[titre ligne]{\ligne};
+
+% lanthanides
+\foreach \col in {1,...,14} {
+	\draw (\xoriginlanth-1, \yoriginlanth) ++ (\col, 0) node[titre colonne]{\col};
+	\draw ({\xoriginlanth+\col-1}, {\yoriginlanth-1}) coordinate(\col-L);
+	\draw ({\xoriginlanth+\col-1}, {\yoriginlanth-2}) coordinate(\col-A);
+}
+\input{simple_metaux}
+\draw[very thick] (2.5, -.5) -- ++(0,2) (\xoriginlanth-.5, \yoriginlanth-.5) -- ++(0,-2);
+\draw (2.5, -.5) |- (\xoriginlanth-.5, \yoriginlanth-1.5);
+\end{tikzpicture}
+
+\end{document}

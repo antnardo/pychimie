@@ -1,0 +1,52 @@
+%!TEX TS-program = PGF
+%!TEX encoding = UTF-8
+\documentclass{standalone}
+\input{tikzstandalone}
+\begin{document}
+
+\def\courbepHKe{1e-14}% produit ionique de l'eau
+\def\courbepHKaa{10^(-6.3)}% Ka1
+\def\courbepHKab{10^(-10.3)}% Ka2
+\def\courbepHCa{0.10} %becher
+\def\courbepHVa{10.0} % volume d'acide (mL)
+\def\courbepHCb{0.10} % burette
+\pgfmathsetmacro{\Veq}{\courbepHCb*\courbepHVa/\courbepHCb}
+\pgfmathsetmacro{\courbepHka}{\courbepHKaa}
+\pgfmathsetmacro{\courbepHkb}{\courbepHKaa*\courbepHKab}
+
+\begin{tikzpicture}[
+	declare function={%déclaration de fonctions :
+	Oxo(\pH)=10^(-\pH);% h concentration des ions H3O+
+	x0(\pH)=1/(1+\courbepHka/Oxo(\pH)+\courbepHkb/(Oxo(\pH)^2));%fraction acide
+	x1(\pH)=x0(\pH)*\courbepHka/Oxo(\pH);% fraction base
+	x2(\pH)=x0(\pH)*\courbepHkb/(Oxo(\pH)^2);% fraction base
+	Y(\pH)=x1(\pH) + 2*x2(\pH);% moment
+	w(\pH)=\courbepHKe/Oxo(\pH)-Oxo(\pH); % w-h
+	frac_base(\pH)=Y(\pH) + w(\pH)/\courbepHCa;
+	V_verse(\pH)=frac_base(\pH)*\Veq;% volume de base versée
+}]
+	
+	\begin{axis}[% mise en forme du graphique :
+		xmin=0,xmax=14,
+		ymin=0,ymax=1,
+		xlabel={volume $V_b$ versé (\si{mL})},
+		ylabel={\pH},
+		ytick distance=2,
+		minor y tick num=1,% nombre de graduations secondaires intermédiaires
+		minor x tick num=4,% nombre de graduations secondaires intermédiaires
+		grid,
+		grid=both,% grilles primaire et secondaire
+		title={titrage pH-métrique d'un di-acide faible},
+		axis line shift=3pt,
+		xtick align=outside,
+		ytick align=outside,
+		tickpos=left,
+	]
+		\addplot[domain=0:14, thick, samples=200] ({x},{x0(x)});% volume versé en x, et pH en y
+		\addplot[domain=0:14, thick, samples=200] ({x},{x1(x)});% volume versé en x, et pH en y
+		\addplot[domain=0:14, thick, samples=200] ({x},{x2(x)});% volume versé en x, et pH en y
+	\end{axis}
+	
+\end{tikzpicture}
+
+\end{document}

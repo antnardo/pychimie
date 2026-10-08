@@ -1,0 +1,32 @@
+%!TEX TS-program = PGF
+%!TEX encoding = UTF-8
+\documentclass{standalone}
+\input{tikzstandalone}
+\begin{document}
+
+\def\pKeval{14}
+\def\pKaa{6.3}. % Ka1
+\def\pKab{10.3}. % Ka2
+\def\Cbecher{0.01} % Concentration totale acide dans le becher
+\def\Vbecher{10.0} % Volume d'acide (mL)
+\def\Cburette{0.010} % Concentration base forte burette
+\pgfmathsetmacro{\Veq}{\Cburette*\Vbecher/\Cburette}
+
+\begin{tikzpicture}[
+	declare function = {
+		h(\pH) = 10^(-\pH);
+		x0(\pH)=1/(1+10^(\pH-\pKaa) +10^(2*\pH-\pKaa-\pKab));
+		x1(\pH)=1/(1+10^(\pKaa-\pH) +10^(\pH-\pKab));
+		x2(\pH)=1/(1+10^(\pKaa+\pKab-2*\pH) + 10^(\pKab-\pH));
+		Y1(\pH)=x1(\pH) + 2*x2(\pH);
+		delta(\pH)=10^(-\pKeval+\pH)-h(\pH);
+		n(\pH)=Y1(\pH) + delta(\pH)/\Cbecher;
+		V_verse(\pH)=n(\pH)*\Veq;% volume de base versée
+}]
+	
+	\begin{axis}[xmin=0, xmax=25]
+		\addplot[domain=1:13, thick, samples=200] ({V_verse(x)},{x});% volume versé en x, et pH en y
+	\end{axis}	
+\end{tikzpicture}
+
+\end{document}

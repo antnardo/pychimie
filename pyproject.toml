@@ -5,10 +5,19 @@ description = "Thermochimie (avancement, équilibre, rupture), données atomique
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Antonin Marchand" }]
-dependencies = []
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+]
 
 [dependency-groups]
-dev = ["pytest", "ruff", "mypy"]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+    "matplotlib>=3.7",
+    "titrages",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -20,10 +29,21 @@ packages = ["src/pychimie"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "N", "C4", "PTH", "RET"]
-ignore = ["RUF001", "RUF002", "RUF003"]
+# RUF001-003 : ambiguïtés unicode, la prose est en français.
+# N802, N803, N806, N815, N816 : les notations de la chimie et de la thermodynamique
+# — pH, pKa, K, T, P, V, DrH0 — se lisent mieux que leur transcription en minuscules.
+ignore = ["RUF001", "RUF002", "RUF003", "N802", "N803", "N806", "N815", "N816"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pychimie"]
+known-third-party = ["titrages"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -32,3 +52,6 @@ addopts = "-q --strict-markers"
 [tool.mypy]
 files = ["src"]
 ignore_missing_imports = true
+
+[tool.uv.sources]
+titrages = { path = "../titrages", editable = true }

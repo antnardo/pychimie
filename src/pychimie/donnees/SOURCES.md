@@ -50,7 +50,7 @@ uv run --group donnees python scripts/generer_elements.py
 | Colonne | Grandeur | Référence citée par mendeleev |
 | --- | --- | --- |
 | `configuration` | configuration électronique de l'état fondamental | — |
-| `electronegativite` | électronégativité de Pauling | CRC Handbook (Haynes 2014) |
+| `electronegativite` | électronégativité de Pauling | CRC Handbook (Haynes 2014) ; Kr (3,00), absent de mendeleev, repris du CRC |
 | `rayon_atomique` | rayon atomique empirique, pm | Slater 1964 |
 | `rayon_covalent` | rayon covalent, pm | Cordero *et al.* 2008 |
 | `rayon_vdw` | rayon de van der Waals, pm | CRC Handbook (Haynes 2014) |

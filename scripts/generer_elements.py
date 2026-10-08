@@ -88,6 +88,12 @@ SANS_ECHANTILLON = frozenset({85, 87, *range(100, 119)})
 
 T_AMBIANTE = 298.15  # K, 25 °C : l'état « standard » des tableaux.
 
+# Électronégativité de Pauling absente de mendeleev mais donnée par sa source, le
+# CRC Handbook (table « Electronegativity of the Elements ») : le krypton, que KrF2
+# rend utile en classe. Les estimations des lanthanides et actinides isolés ne
+# sont pas ajoutées.
+PAULING_COMPLEMENTS = {36: 3.00}
+
 ANNEE = 3.15576e7  # s, année julienne
 DUREES = {
     "ysec": 1e-24,
@@ -283,7 +289,7 @@ def main() -> None:
                 "incertitude_masse": ciaaw[Z]["incertitude"] or None,
                 "isotope_reference": isotope,
                 "configuration": configuration(e.electronic_configuration),
-                "electronegativite": nombre(e.en_pauling),
+                "electronegativite": nombre(e.en_pauling) or PAULING_COMPLEMENTS.get(Z),
                 "rayon_atomique": nombre(e.atomic_radius),
                 "rayon_covalent": nombre(e.covalent_radius_cordero),
                 "rayon_vdw": nombre(e.vdw_radius),

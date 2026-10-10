@@ -87,6 +87,9 @@ Par rapport à `chimie/atomes.py`, `chimie/periodikz.py` et `chimie/atomes.csv` 
 
 ### Supprimé
 
+- `exemples/titrages/` et `tests/test_migration_titrages.py`, qui ne concernaient que
+  le paquet `titrages` : déposés dans son dépôt (`examples/07_…` à `11_…`,
+  `tests/test_migration_chimie.py`), avec la dépendance de développement `titrages`.
 - `chimie/thermochimie.py`.
 - `chimie/atomes.py`, `chimie/atomes.csv` (données d'origine Wikipédia),
   `chimie/periodikz.py`, `chimie/composes.py`, `chimie/composes.csv`,

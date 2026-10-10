@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pychimie import Constituant, Formule, Reaction, TableThermo, table_thermo
+from pychimie import Constituant, DonneesThermo, Formule, Reaction, TableThermo, table_thermo
 
 RACINE = Path(__file__).resolve().parents[1]
 # Les espèces que l'audit du 10 octobre 2026 relevait absentes : dix équations
@@ -91,6 +91,27 @@ class TestTable:
         e = table_thermo()["N2(g)"]
         with pytest.raises(ValueError):
             TableThermo((e, e))
+
+    def test_avec_ajoute_une_espece(self):
+        xe = DonneesThermo("Xe", "g", "xénon", 0.0, 169.68, 20.786, "test")
+        t = table_thermo().avec(xe)
+        assert (len(t), t["Xe(g)"].nom, len(table_thermo())) == (128, "xénon", 127)
+
+    def test_avec_refuse_une_espece_presente(self):
+        with pytest.raises(ValueError, match="deux fois"):
+            table_thermo().avec(table_thermo()["N2(g)"])
+
+    def test_ecrire_puis_lire_rend_la_meme_table(self, tmp_path):
+        chemin = table_thermo().ecrire(tmp_path / "copie.csv")
+        relue = TableThermo.lire(chemin)
+        assert [(e.cle, e.DfH0, e.Sm0, e.Cp0, e.source) for e in relue] == [
+            (e.cle, e.DfH0, e.Sm0, e.Cp0, e.source) for e in table_thermo()
+        ]
+
+    def test_ecrire_redonne_le_csv_du_paquet(self, tmp_path):
+        chemin = table_thermo().ecrire(tmp_path / "copie.csv")
+        original = RACINE / "src" / "pychimie" / "donnees" / "thermo298.csv"
+        assert chemin.read_text("utf-8") == original.read_text("utf-8")
 
 
 class TestHessValeursDeCours:

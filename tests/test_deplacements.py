@@ -129,3 +129,50 @@ class TestBalayage:
     def test_xi_max(self, nh3_equilibre):
         b = balayage(lambda x: nh3_equilibre.avec(initial={"N2": x, "H2": 1 - x}), [0.1, 0.5])
         assert b.xi_max == pytest.approx([0.1, 1 / 6])
+
+
+class TestBalayageCommePerturber:
+    """``balayage(s, T=…)``, ``P=…``, ``ajout=…`` : le clavier de ``perturber``."""
+
+    @pytest.mark.parametrize("cle", ["T", "P"])
+    def test_condition_equivaut_a_la_fabrique(self, nh3_equilibre, cle):
+        grille = [500, 700, 900] if cle == "T" else [10, 100, 1000]
+        b = balayage(nh3_equilibre, **{cle: grille})
+        attendu = balayage(lambda v: nh3_equilibre.avec(**{cle: v}), grille)
+        assert (b.parametre, b.xi.tolist()) == (cle, attendu.xi.tolist())
+
+    def test_volume_de_gaz(self, calcaire):
+        s = Systeme(calcaire, {"CaCO3": 1}, T=1100, V_gaz=10)
+        b = balayage(s, V_gaz=[10, 100])
+        assert (b.parametre, bool(np.all(np.diff(b.xi) > 0))) == ("V_gaz", True)
+
+    def test_ajout_d_un_inerte(self, nh3_equilibre):
+        b = balayage(nh3_equilibre, ajout={"Ar(g)": [0, 1, 5, 20]})
+        attendu = balayage(lambda n: nh3_equilibre.avec(inertes={"Ar(g)": n}), [0, 1, 5, 20])
+        assert (b.parametre, b.xi.tolist()) == ("Ar(g)", attendu.xi.tolist())
+
+    def test_ajout_d_un_constituant_part_de_l_etat_initial(self, nh3_equilibre):
+        b = balayage(nh3_equilibre, ajout={"N2": [0, 1]})
+        assert b.n("N2") + b.n("NH3") / 2 == pytest.approx([1.0, 2.0])
+
+    def test_ajout_d_un_nom_inconnu(self, nh3_equilibre):
+        with pytest.raises(KeyError):
+            balayage(nh3_equilibre, ajout={"Ar": [0, 1]})
+
+    @pytest.mark.parametrize(
+        "appel",
+        [
+            lambda s: balayage(s),
+            lambda s: balayage(s, [1, 2]),
+            lambda s: balayage(s, T=[500], P=[10]),
+            lambda s: balayage(s, T=[500], ajout={"N2": [0]}),
+            lambda s: balayage(lambda T: s.avec(T=T), [500], P=[10]),
+            lambda s: balayage(lambda T: s.avec(T=T)),
+        ],
+    )
+    def test_un_seul_parametre(self, nh3_equilibre, appel):
+        with pytest.raises(TypeError):
+            appel(nh3_equilibre)
+
+    def test_fabrique_sans_nom_de_parametre(self, nh3_equilibre):
+        assert balayage(lambda T: nh3_equilibre.avec(T=T), [500]).parametre == ""

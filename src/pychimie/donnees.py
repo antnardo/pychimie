@@ -24,6 +24,13 @@ from pychimie.equation import Constituant
 
 __all__ = ["DonneesThermo", "TableThermo", "table_thermo"]
 
+COLONNES = ("formule", "phase", "nom", "DfH0_kJ_mol", "Sm0_J_K_mol", "Cp0_J_K_mol", "source")
+
+
+def _texte(x: float) -> str:
+    """Un flottant écrit comme ``csv.writer`` l'écrit dans le script : ``0.0``, ``-46.11``."""
+    return str(round(x, 6))
+
 
 @dataclass(frozen=True, slots=True)
 class DonneesThermo:
@@ -89,6 +96,31 @@ class TableThermo:
     def cles(self) -> tuple[str, ...]:
         """Les clés ``"formule(phase)"`` des espèces, dans l'ordre de la table."""
         return tuple(self._especes)
+
+    def avec(self, *especes: DonneesThermo) -> "TableThermo":
+        """Une table augmentée de ``especes`` — par exemple celles que rend
+        :meth:`~pychimie.reaction.Reaction.donnees_de` ; une espèce déjà présente est refusée."""
+        return TableThermo((*self._especes.values(), *especes))
+
+    def ecrire(self, chemin: str | Path) -> Path:
+        """Écrit la table au format de ``thermo298.csv`` ; :meth:`lire` la relit."""
+        chemin = Path(chemin)
+        with chemin.open("w", encoding="utf-8", newline="") as f:
+            ecrivain = csv.writer(f, lineterminator="\n")
+            ecrivain.writerow(COLONNES)
+            for e in self._especes.values():
+                ecrivain.writerow(
+                    (
+                        e.formule,
+                        e.phase,
+                        e.nom,
+                        _texte(e.DfH0 / 1e3),
+                        _texte(e.Sm0),
+                        "" if e.Cp0 is None else _texte(e.Cp0),
+                        e.source,
+                    )
+                )
+        return chemin
 
     def __contains__(self, cle: object) -> bool:
         return cle in self._especes

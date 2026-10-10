@@ -33,6 +33,11 @@ perturber(s, P=300).sens  # +1 : une hausse de P déplace vers NH₃
   van 't Hoff si ΔrH° est donné ; sans ΔrH°, K° ne dépend pas de T.
 - `r.K0(T)`, `r.ln_K0(T)`, `r.DrG0(T)`, `r.DrH0(T)`, `r.DrS0(T)` acceptent des tableaux.
   L'approximation d'Ellingham est le cas ΔrC°p = 0 (`r.ellingham()`).
+- `r.temperature(K0)` : l'inverse de `K0(T)` — la température où K° vaut `K0`, et
+  sans argument la température d'inversion (K° = 1).
+- `r.donnees_de("NH3")` : l'inverse de `depuis_tables` — ΔfH°, S°m (et C°p) d'une
+  espèce déduits de ΔrH°, ΔrS° d'un énoncé et des tables pour les autres ; la table
+  s'en augmente (`table_thermo().avec(d)`) et s'écrit (`TableThermo.ecrire`).
 
 L'équation s'écrit avec la phase de chaque constituant : `g`, `l`, `s` ou `aq`. Un `s`
 ou un `l` sans étiquette est un corps pur (activité 1) ; `l1`, `s2`… désignent un
@@ -65,9 +70,11 @@ volume du gaz s'il est fixé à la place de P, `inertes` les constituants inacti
 - `perturber(s, T=…)`, `perturber(s, P=…)`, `perturber(s, ajout={"Ar(g)": 1})` :
   l'équilibre de départ, Q et K° juste après la perturbation, le sens d'évolution et le
   déplacement δξ.
-- `balayage(lambda T: s.avec(T=T), valeurs)` : ξ_f, taux d'avancement, quantités et
-  fractions finales le long d'un paramètre (T, P, quantité d'inerte, proportions
-  initiales).
+- `balayage(s, T=valeurs)`, `balayage(s, P=…)`, `balayage(s, ajout={"Ar(g)": …})` :
+  ξ_f, taux d'avancement, quantités et fractions finales le long du même paramètre
+  que `perturber` — ici la quantité s'ajoute à la composition initiale ; et
+  `balayage(lambda x: s.avec(initial={"N2": x, "H2": 1 - x}), x)` pour tout autre
+  paramètre.
 
 Les scripts de `exemples/equilibres/` refont ceux du cours (`Optimisation_NH3_*.py`,
 `Optimisation_Boudouard.py`) et y ajoutent K°(T) avec Kirchhoff, les déplacements

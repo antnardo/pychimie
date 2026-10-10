@@ -20,6 +20,7 @@ K° se construit par :meth:`Reaction.depuis_K0`, qui dit ce qu'elle suppose.
 Les températures sont en kelvins et peuvent être des tableaux : ``r.K0(T)`` se trace.
 """
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -27,8 +28,8 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy.constants import R
 
-from pychimie._calcul import Flottants, sortie, temperatures
-from pychimie.donnees import TableThermo, table_thermo
+from pychimie._calcul import T_MIN, Flottants, sortie, temperatures
+from pychimie.donnees import DonneesThermo, TableThermo, table_thermo
 from pychimie.equation import Equation
 
 __all__ = ["Reaction"]
@@ -118,6 +119,44 @@ class Reaction:
             T_ref=TableThermo.T_REF,
         )
 
+    def donnees_de(self, nom: str, *, table: TableThermo | None = None) -> DonneesThermo:
+        """ΔfH°, S°m (et C°p) de l'espèce ``nom``, déduits de la réaction et des autres espèces.
+
+        L'inverse de :meth:`depuis_tables` : un énoncé donne ΔrH° et ΔrS° d'une réaction
+        et les tables pour tous ses constituants sauf un, dont on tire les grandeurs de
+        formation. C°p n'est déduit que si la réaction est en Kirchhoff et que les
+        autres espèces ont un C°p ; il vaut ``None`` sinon. La réaction doit être
+        référencée à 298,15 K, la température de la table.
+
+        >>> r = Reaction("N2(g) + 3 H2(g) = 2 NH3(g)", DrH0=-92.22e3, DrS0=-198.76)
+        >>> round(r.donnees_de("NH3").DfH0 / 1e3, 2)
+        -46.11
+        """
+        if self.T_ref != TableThermo.T_REF:
+            raise ValueError(f"la réaction est référencée à {self.T_ref:g} K, la table à 298,15 K")
+        table = table_thermo() if table is None else table
+        constituants = self.equation.constituants
+        inconnu = constituants[self.equation.indice(nom)]
+        autres = [(c, table[c]) for c in constituants if c is not inconnu]
+
+        def deduire(total: float, valeurs: list[float]) -> float:
+            # ΔrX° = ν_inconnu X_inconnu + Σ_autres ν X  →  X_inconnu
+            somme = sum(c.nu * x for (c, _), x in zip(autres, valeurs, strict=True))
+            return (total - somme) / inconnu.nu
+
+        cp: float | None = None
+        if self.kirchhoff and all(d.Cp0 is not None for _, d in autres):
+            cp = deduire(self.DrCp0, [d.Cp0 for _, d in autres if d.Cp0 is not None])
+        return DonneesThermo(
+            formule=inconnu.formule,
+            phase=inconnu.etat if inconnu.etat != "aq" else "aq",
+            nom=inconnu.nom,
+            DfH0=deduire(self.DrH0_ref, [d.DfH0 for _, d in autres]),
+            Sm0=deduire(self.DrS0_ref, [d.Sm0 for _, d in autres]),
+            Cp0=cp,
+            source=f"déduit de {self.equation}",
+        )
+
     @property
     def kirchhoff(self) -> bool:
         """Vrai si ΔrC°p ≠ 0 : ΔrH° et ΔrS° varient avec T."""
@@ -159,6 +198,37 @@ class Reaction:
     def K0(self, T: ArrayLike | None = None) -> Flottants:
         """K°(T) = exp(−ΔrG°(T)/RT)."""
         return sortie(np.exp(np.asarray(self.ln_K0(T))))
+
+    def temperature(self, K0: float = 1.0) -> float:
+        """La température (K) où K° vaut ``K0`` : l'inverse de :meth:`K0`.
+
+        Sans argument, la température d'inversion, où ΔrG° = 0 : en approximation
+        d'Ellingham, T = ΔrH°/ΔrS°, et plus généralement T = ΔrH°/(ΔrS° − R ln K°).
+        Avec Kirchhoff, la racine de ln K°(T) − ln K0 se cherche numériquement. Lève
+        ``ValueError`` si K° ne prend jamais cette valeur.
+
+        >>> r = Reaction("C(s) + CO2(g) = 2 CO(g)", DrH0=172.5e3, DrS0=175.8)
+        >>> round(r.temperature(), 1)
+        981.2
+        """
+        if K0 <= 0:
+            raise ValueError("K° est strictement positive")
+        cible = float(np.log(K0))
+        bas, haut = T_MIN, 1e5  # le domaine de K0(T) : au-dessous de 100 K, T est refusée
+        if not self.kirchhoff:
+            denominateur = self.DrS0_ref - R * cible
+            T = self.DrH0_ref / denominateur if denominateur != 0 else math.inf
+            if not bas <= T <= haut:
+                raise ValueError(f"K° ne vaut jamais {K0:g} entre {bas:g} et {haut:g} K")
+            return float(T)
+        from scipy.optimize import brentq  # chargé ici seulement
+
+        def f(T: float) -> float:
+            return float(self.ln_K0(T)) - cible
+
+        if f(bas) * f(haut) > 0:
+            raise ValueError(f"K° ne vaut jamais {K0:g} entre {bas:g} et {haut:g} K")
+        return float(brentq(f, bas, haut, xtol=1e-9))
 
     def __str__(self) -> str:
         texte = (

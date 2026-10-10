@@ -24,7 +24,12 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
   - `scipy.optimize` n'est chargé qu'à la première résolution : l'import de
     `pychimie` passe de 0,50 s à 0,26 s ;
   - `perturber` et `balayage` : déplacements d'équilibre par T, P, ajout d'un
-    constituant actif ou inactif, proportions initiales.
+    constituant actif ou inactif, proportions initiales ; `balayage` se donne comme
+    `perturber` (`balayage(s, T=…)`, `P=…`, `ajout=…`) ou par une fabrique ;
+  - chaque méthode a sa symétrique : `Reaction.temperature(K0)` inverse `K0(T)`,
+    `Reaction.donnees_de(nom)` inverse `depuis_tables` (avec `TableThermo.avec` et
+    `TableThermo.ecrire`, symétrique de `lire`), `Preparation.masse_a_peser` répond à
+    `volume_a_prelever`, `Systeme.K0()`/`DrG0()` à ceux de `Reaction`.
 - Table de ΔfH°, S°m et C°p à 298,15 K pour 127 espèces des sujets de CPGE (tables
   NBS 1982, NIST-JANAF 1998 pour FeO) : gaz, halogènes et hydracides, composés du
   carbone jusqu'à C₂, métaux usuels avec oxydes, sulfures et sels, 28 espèces
@@ -110,8 +115,9 @@ Par rapport à `chimie/atomes.py`, `chimie/periodikz.py` et `chimie/atomes.csv` 
 - `exemples/titrages/` et `tests/test_migration_titrages.py`, qui ne concernaient que
   le paquet `titrages` : déposés dans son dépôt (`examples/07_…` à `11_…`,
   `tests/test_migration_chimie.py`), avec la dépendance de développement `titrages`.
-- `__all__` ne reprend plus `ARTICLES_WIKIPEDIA`, `CARACTERES`, `PHASES`, `RHO_EAU`
-  ni `DonneesThermo`, que rien n'appelait : ils restent dans leurs modules.
+- `__all__` ne reprend plus `ARTICLES_WIKIPEDIA`, `CARACTERES`, `PHASES` ni `RHO_EAU`,
+  que rien n'appelait : ils restent dans leurs modules (`DonneesThermo` y reste, rendu
+  par `donnees_de`).
 - Les sorties TikZ des exemples (`exemples/periodikz/simple_metaux.tex`,
   `schemas_pgfpt.tex`) ne sont plus suivies par git : les scripts les régénèrent.
 - `chimie/thermochimie.py`.

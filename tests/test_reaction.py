@@ -3,7 +3,7 @@ import pytest
 from scipy.constants import R
 from scipy.integrate import quad
 
-from pychimie import Equation, Reaction, table_thermo
+from pychimie import DonneesThermo, Equation, Reaction, table_thermo
 
 
 class TestHess:
@@ -120,6 +120,80 @@ class TestDepuisK0:
     def test_K0_negative_refusee(self):
         with pytest.raises(ValueError):
             Reaction.depuis_K0("A(g) = B(g)", -1.0)
+
+
+class TestTemperature:
+    """``Reaction.temperature(K0)`` est l'inverse de ``K0(T)``."""
+
+    def test_inversion_ellingham(self, boudouard):
+        assert boudouard.temperature() == pytest.approx(172.5e3 / 175.8)
+
+    def test_inverse_de_K0(self, boudouard):
+        assert boudouard.K0(boudouard.temperature(2.5)) == pytest.approx(2.5, rel=1e-12)
+
+    def test_inverse_de_K0_avec_kirchhoff(self, nh3_tables):
+        r = Reaction.depuis_tables("N2(g) + 3 H2(g) = 2 NH3(g)", kirchhoff=True)
+        T = r.temperature(1e-4)
+        assert (r.kirchhoff, float(r.K0(T))) == (True, pytest.approx(1e-4, rel=1e-8))
+
+    def test_calcaire_K0_egal_un(self, calcaire):
+        assert calcaire.temperature() == pytest.approx(1110, abs=1)
+
+    @pytest.mark.parametrize("K0", [1e300, 1e-12])
+    def test_K0_jamais_atteinte_entre_100_K_et_1e5_K(self, nh3, K0):
+        """1e300 : atteinte à 15 K, hors domaine ; 1e-12 : sous la limite exp(ΔrS°/R)."""
+        with pytest.raises(ValueError, match="jamais"):
+            nh3.temperature(K0)
+
+    def test_K0_non_positive(self, nh3):
+        with pytest.raises(ValueError, match="positive"):
+            nh3.temperature(0)
+
+
+class TestDonneesDe:
+    """``Reaction.donnees_de(nom)`` est l'inverse de ``depuis_tables``."""
+
+    def test_retrouve_la_table(self, nh3_tables):
+        d = nh3_tables.donnees_de("NH3")
+        attendu = table_thermo()["NH3(g)"]
+        assert (d.cle, d.DfH0, d.Sm0, d.Cp0) == (
+            "NH3(g)",
+            pytest.approx(attendu.DfH0),
+            pytest.approx(attendu.Sm0),
+            None,
+        )
+
+    def test_cp_avec_kirchhoff(self):
+        r = Reaction.depuis_tables("CaCO3(s) = CaO(s) + CO2(g)", kirchhoff=True)
+        assert r.donnees_de("CaCO3").Cp0 == pytest.approx(table_thermo()["CaCO3(s)"].Cp0)
+
+    def test_cp_absent_si_une_autre_espece_n_en_a_pas(self):
+        r = Reaction("Fe^2+(aq) + Ag+(aq) = Fe^3+(aq) + Ag(s)", DrH0=-65e3, DrS0=-93.0, DrCp0=-1.0)
+        d = r.donnees_de("Ag+")
+        assert (d.phase, d.Cp0) == ("aq", None)
+
+    def test_valeur_d_enonce(self):
+        """ΔrH° de combustion du méthane → ΔfH°(CH₄), comme dans un exercice."""
+        r = Reaction("CH4(g) + 2 O2(g) = CO2(g) + 2 H2O(l)", DrH0=-890.36e3, DrS0=-242.8)
+        assert r.donnees_de("CH4").DfH0 == pytest.approx(-74.81e3, abs=20)
+
+    def test_source_nomme_la_reaction(self, nh3_tables):
+        assert "N2(g)" in nh3_tables.donnees_de("NH3").source
+
+    def test_table_augmentee_reutilisable(self):
+        r = Reaction("A(g) + B(g) = AB(g)", DrH0=-50e3, DrS0=-100.0)
+        table = table_thermo().avec(
+            DonneesThermo("A", "g", "a", 0.0, 100.0, 30.0, "test"),
+            DonneesThermo("B", "g", "b", 0.0, 120.0, 30.0, "test"),
+        )
+        ab = r.donnees_de("AB", table=table)
+        r2 = Reaction.depuis_tables("A(g) + B(g) = AB(g)", table=table.avec(ab))
+        assert (r2.DrH0_ref, r2.DrS0_ref) == (pytest.approx(-50e3), pytest.approx(-100.0))
+
+    def test_autre_temperature_de_reference_refusee(self):
+        r = Reaction.depuis_K0("A(g) = B(g)", 2.0, T=500)
+        with pytest.raises(ValueError, match="298"):
+            r.donnees_de("A")
 
 
 class TestErreurs:

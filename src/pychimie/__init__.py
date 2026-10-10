@@ -18,7 +18,7 @@ Thermochimie des équilibres : avancement, Q(ξ), K°(T), G(ξ), rupture, dépla
 """
 
 from pychimie.deplacements import Balayage, Perturbation, balayage, perturber
-from pychimie.donnees import TableThermo, table_thermo
+from pychimie.donnees import DonneesThermo, TableThermo, table_thermo
 from pychimie.elements import FAMILLES, Element, TableauPeriodique, element, tableau_periodique
 from pychimie.equation import Constituant, Equation
 from pychimie.formules import AnalyseurFormule, Formule, FormuleInvalide, masse_molaire
@@ -43,6 +43,7 @@ __all__ = [
     "Balayage",
     "Constituant",
     "Couleur",
+    "DonneesThermo",
     "Element",
     "Equation",
     "EtatFinal",

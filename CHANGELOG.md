@@ -35,7 +35,10 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
   valeurs de cours de neuf réactions et trois constantes. `TableThermo.cles()`.
 - `exemples/equilibres/` : les scripts `Optimisation_NH3_*.py` et
   `Optimisation_Boudouard.py` refaits, K°(T) avec Kirchhoff, déplacements
-  d'équilibre, rupture d'équilibre du carbonate de calcium.
+  d'équilibre, rupture d'équilibre du carbonate de calcium, et
+  `nh3_ellingham_kirchhoff_nasa.py` : K°(T) de la synthèse de l'ammoniac par
+  Ellingham, Kirchhoff et les polynômes NASA de GRI-Mech 3.0 (coefficients de N₂,
+  H₂, NH₃ recopiés avec leur source, sans Cantera).
 - Table des 118 éléments reconstruite (`src/pychimie/donnees/elements.csv`) à partir
   des masses atomiques standard abrégées de la CIAAW (table 2024 : IUPAC 2021 et
   révisions de Gd, Lu, Zr) et du paquet mendeleev (MIT), avec les noms français ;

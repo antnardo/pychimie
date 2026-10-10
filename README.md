@@ -71,7 +71,10 @@ volume du gaz s'il est fixé à la place de P, `inertes` les constituants inacti
 
 Les scripts de `exemples/equilibres/` refont ceux du cours (`Optimisation_NH3_*.py`,
 `Optimisation_Boudouard.py`) et y ajoutent K°(T) avec Kirchhoff, les déplacements
-d'équilibre et la rupture d'équilibre du carbonate de calcium.
+d'équilibre, la rupture d'équilibre du carbonate de calcium, et
+`nh3_ellingham_kirchhoff_nasa.py`, qui compare K°(T) de la synthèse de l'ammoniac en
+approximation d'Ellingham, avec Kirchhoff et par les polynômes NASA de GRI-Mech 3.0
+(coefficients recopiés, sans Cantera) : à 700 K, 3,2·10⁻⁴, 6,9·10⁻⁵ et 8,8·10⁻⁵.
 
 ### Données
 

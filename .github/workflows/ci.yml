@@ -1,0 +1,37 @@
+# À chaque push et pull request : la suite de tests sous les Python pris en
+# charge, ruff et mypy. Les gabarits TikZ ne sont pas compilés ici (pas de TeX
+# Live) : les tests vérifient le texte produit.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+      - name: Tests sous Python ${{ matrix.python }}
+        run: uv run --python ${{ matrix.python }} pytest
+
+  qualite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+      - run: uv run ruff check src tests exemples scripts
+      - run: uv run ruff format --check src tests exemples scripts
+      - run: uv run mypy

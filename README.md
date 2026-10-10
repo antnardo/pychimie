@@ -3,8 +3,21 @@
 Thermochimie (avancement, équilibre, rupture), données atomiques et tableau périodique en TikZ
 
 Les équilibres en solution (pH, titrages pH-métriques, conductimétriques et
-potentiométriques) relèvent du paquet `titrages`. L'historique de la reprise de
-l'ancien module `chimie` est dans `../AUDIT.md` (8 octobre 2026).
+potentiométriques) relèvent du paquet [titrages](https://github.com/antnardo/titrages).
+Le paquet reprend, réécrit, un module privé `chimie` (2020-2024).
+
+## Installation
+
+Python 3.11 ou plus, numpy et scipy ; rien d'autre (CoolProp, pint, mendeleev ne
+sont pas des dépendances : la table des éléments est figée dans le paquet).
+
+```bash
+pip install git+https://github.com/antnardo/pychimie
+```
+
+Ou, pour travailler sur le code, `git clone` puis `uv sync --group dev` dans le
+dossier ; `uv run pytest` lance les tests. Pour les gabarits TikZ, un TeX Live avec
+LuaLaTeX, siunitx et hyperref.
 
 ## Équilibres chimiques
 

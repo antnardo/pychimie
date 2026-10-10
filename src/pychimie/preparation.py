@@ -10,7 +10,8 @@ concentration.
 
 Unités de la chimie des solutions, plutôt que du SI : concentrations en mol/L,
 concentrations massiques en g/L, volumes en L, masses en g. La densité est celle
-d'un liquide par rapport à l'eau, ρ = d × 1000 g/L.
+d'un liquide par rapport à l'eau, ρ = d × 1000 g/L. Un volume au-delà de 10 L est
+refusé : à la paillasse, c'est un volume en millilitres donné par mégarde.
 """
 
 from dataclasses import dataclass
@@ -25,10 +26,22 @@ __all__ = [
 ]
 
 RHO_EAU = 1000.0  # g/L : masse volumique de référence de la densité
+V_MAX = 10.0  # L : au-delà, le volume a toutes les chances d'être en mL.
 
 
 def _formule(solute: str | Formule) -> Formule:
     return Formule.lire(solute) if isinstance(solute, str) else solute
+
+
+def _litres(volume: float) -> float:
+    if volume <= 0:
+        raise ValueError("le volume est strictement positif")
+    if volume > V_MAX:
+        raise ValueError(
+            f"le volume est en litres : {volume:g} L ? Un volume en millilitres se divise "
+            f"par 1000 ({volume:g} mL = {volume / 1000:g} L)"
+        )
+    return volume
 
 
 def masse_a_peser(solute: str | Formule, concentration: float, volume: float) -> float:
@@ -38,7 +51,7 @@ def masse_a_peser(solute: str | Formule, concentration: float, volume: float) ->
     ``masse_a_peser("CuSO4·5H2O", 0.1, 0.1)`` donne 2,50 g, contre 1,60 g pour le
     sulfate anhydre.
     """
-    return concentration * volume * _formule(solute).masse_molaire()
+    return concentration * _litres(volume) * _formule(solute).masse_molaire()
 
 
 def volume_a_prelever(
@@ -50,7 +63,7 @@ def volume_a_prelever(
     """
     if concentration_fille > concentration_mere:
         raise ValueError("une dilution ne peut pas augmenter la concentration")
-    return concentration_fille * volume / concentration_mere
+    return concentration_fille * _litres(volume) / concentration_mere
 
 
 @dataclass(frozen=True, slots=True)

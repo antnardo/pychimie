@@ -14,11 +14,11 @@ T, P = 400, 100  # K, bar
 s = Systeme(nh3, {"N2": 1, "H2": 1, "NH3": 1}, T=T, P=P)
 xi = s.avancements(2000)
 xi_eq = s.xi_eq()
-print(f"ξ ∈ [{s.xi_min:g}, {s.xi_max:.4f}] mol, K° = {s.K0:.4g}, ξ_éq = {xi_eq:.6f} mol")
+print(f"ξ ∈ [{s.xi_min:g}, {s.xi_max:.4f}] mol, K° = {s.K0():.4g}, ξ_éq = {xi_eq:.6f} mol")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
 ax1.semilogy(xi, s.Q(xi), label="$Q(\\xi)$")
-ax1.axhline(s.K0, color="C1", label=f"$K^\\circ$ à $T = {T - 273}$ °C")
+ax1.axhline(s.K0(), color="C1", label=f"$K^\\circ$ à $T = {T - 273}$ °C")
 ax1.axvline(xi_eq, color="C2", ls="--", label=f"$\\xi_\\mathrm{{éq}} = {xi_eq:.2f}$ mol")
 ax1.set(xlabel=r"Avancement $\xi$ (mol)", ylabel=f"Quotient réactionnel pour $P = {P}$ bar")
 ax1.legend()

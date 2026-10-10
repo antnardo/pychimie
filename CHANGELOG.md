@@ -15,7 +15,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
     température (`depuis_K0`) ;
   - `Systeme` : avancement, Q(ξ), ΔrG(ξ), G(ξ) et son minimum, état final (équilibre
     ou rupture d'équilibre), à pression fixée ou à volume de gaz fixé, avec solutés,
-    mélanges liquides et constituants inactifs ;
+    mélanges liquides et constituants inactifs ; `K0(T=None)` et `DrG0(T=None)` ont
+    la signature de `Reaction`, à la température du système par défaut ;
+  - gardes d'unités : une pression au-delà de 10⁴ bar, une température au-dessous
+    de 100 K (`Systeme`, `Reaction.K0(T)`…) ou un volume au-delà de 10 L
+    (`masse_a_peser`, `volume_a_prelever`) sont refusés, le message dit la
+    conversion (pascals, degrés Celsius, millilitres) ;
+  - `scipy.optimize` n'est chargé qu'à la première résolution : l'import de
+    `pychimie` passe de 0,50 s à 0,26 s ;
   - `perturber` et `balayage` : déplacements d'équilibre par T, P, ajout d'un
     constituant actif ou inactif, proportions initiales.
 - Table de ΔfH°, S°m et C°p à 298,15 K pour 26 espèces (tables NBS 1982, NIST-JANAF

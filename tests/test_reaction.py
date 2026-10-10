@@ -123,6 +123,14 @@ class TestDepuisK0:
 
 
 class TestErreurs:
+    def test_temperature_en_celsius_refusee(self, nh3):
+        with pytest.raises(ValueError, match="kelvins"):
+            nh3.K0(25)
+
+    def test_tableau_de_temperatures_avec_une_valeur_basse(self, nh3):
+        with pytest.raises(ValueError, match="kelvins"):
+            nh3.K0([300, 50, 400])
+
     def test_pas_de_DrH0_DrS0_par_defaut(self):
         """L'ancien Reaction prenait ΔrH° = ΔrS° = 1 en silence."""
         with pytest.raises(TypeError, match="DrS0"):

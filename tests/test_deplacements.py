@@ -74,7 +74,7 @@ class TestPerturbation:
 
     def test_Q_juste_apres_est_l_ancien_K0_si_seul_T_change(self, nh3_equilibre):
         p = perturber(nh3_equilibre, T=800)
-        assert (p.Q, p.K0) == pytest.approx((nh3_equilibre.K0, nh3_equilibre.avec(T=800).K0))
+        assert (p.Q, p.K0) == pytest.approx((nh3_equilibre.K0(), nh3_equilibre.avec(T=800).K0()))
 
     def test_nouvel_equilibre_independant_du_chemin(self, nh3_equilibre):
         apres = perturber(nh3_equilibre, T=800).apres

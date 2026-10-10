@@ -18,6 +18,18 @@ class TestFonctions:
         with pytest.raises(ValueError, match="dilution"):
             volume_a_prelever(0.1, 1.0, 0.1)
 
+    def test_volume_en_millilitres_refuse(self):
+        with pytest.raises(ValueError, match=r"litres.*100 mL = 0.1 L"):
+            masse_a_peser("CuSO4·5H2O", 0.1, 100)
+
+    def test_volume_en_millilitres_refuse_pour_la_dilution(self):
+        with pytest.raises(ValueError, match="litres"):
+            volume_a_prelever(1.0, 0.1, 250)
+
+    def test_volume_nul_refuse(self):
+        with pytest.raises(ValueError, match="positif"):
+            masse_a_peser("NaCl", 0.1, 0)
+
 
 class TestPreparation:
     def test_acide_sulfurique_du_commerce(self):

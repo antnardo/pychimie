@@ -89,11 +89,11 @@ class TestQuotient:
 
 class TestEquilibre:
     def test_Q_egal_K0(self, nh3_scripts):
-        assert nh3_scripts.Q(nh3_scripts.xi_eq()) == pytest.approx(nh3_scripts.K0, rel=1e-13)
+        assert nh3_scripts.Q(nh3_scripts.xi_eq()) == pytest.approx(nh3_scripts.K0(), rel=1e-13)
 
     def test_resolution_independante_nh3(self, nh3_scripts):
         attendu = brentq(
-            lambda x: np.log(q_nh3(x, 1, 1, 1, 100) / nh3_scripts.K0),
+            lambda x: np.log(q_nh3(x, 1, 1, 1, 100) / nh3_scripts.K0()),
             -0.5 + 1e-12,
             1 / 3 - 1e-12,
             xtol=1e-15,
@@ -308,3 +308,59 @@ class TestConstruction:
     def test_pression_a_volume_fixe(self, calcaire):
         s = Systeme(calcaire, {"CaCO3": 1}, T=1100, V_gaz=10)
         assert s.pression(0.2) == pytest.approx(0.2 * R * 1100 / 10e-3 / 1e5)
+
+
+class TestGardesUnites:
+    def test_pression_en_pascals_refusee(self, nh3):
+        with pytest.raises(ValueError, match=r"bar.*2e\+07 Pa = 200 bar"):
+            Systeme(nh3, {"N2": 1}, T=700, P=200e5)
+
+    def test_pression_limite_acceptee(self, nh3):
+        assert Systeme(nh3, {"N2": 1}, T=700, P=1e4).P == 1e4
+
+    def test_temperature_en_celsius_refusee(self, nh3):
+        with pytest.raises(ValueError, match=r"kelvins.*25 °C = 298.15 K"):
+            Systeme(nh3, {"N2": 1}, T=25)
+
+    def test_temperature_limite_acceptee(self, nh3):
+        assert Systeme(nh3, {"N2": 1}, T=100).T == 100.0
+
+    def test_avec_passe_par_les_memes_gardes(self, nh3_scripts):
+        with pytest.raises(ValueError, match="bar"):
+            nh3_scripts.avec(P=1e5)
+
+
+class TestK0DrG0:
+    """``Systeme.K0(T=None)`` et ``DrG0(T=None)`` : la signature de ``Reaction``."""
+
+    def test_K0_a_la_temperature_du_systeme(self, nh3_scripts, nh3):
+        assert nh3_scripts.K0() == pytest.approx(nh3.K0(400), rel=1e-15)
+
+    def test_K0_a_une_autre_temperature(self, nh3_scripts, nh3):
+        assert nh3_scripts.K0(800) == pytest.approx(nh3.K0(800), rel=1e-15)
+
+    def test_K0_accepte_un_tableau(self, nh3_scripts, nh3):
+        T = np.array([400.0, 600.0, 800.0])
+        assert nh3_scripts.K0(T) == pytest.approx(nh3.K0(T), rel=1e-15)
+
+    def test_DrG0_a_la_temperature_du_systeme(self, nh3_scripts, nh3):
+        assert nh3_scripts.DrG0() == pytest.approx(nh3.DrG0(400), rel=1e-15)
+
+    def test_DrG0_a_une_autre_temperature(self, nh3_scripts, nh3):
+        assert nh3_scripts.DrG0(800) == pytest.approx(nh3.DrG0(800), rel=1e-15)
+
+    def test_sans_temperature_K0_demande_T(self, nh3):
+        with pytest.raises(ValueError, match="donner T"):
+            Systeme(nh3, {"N2": 1}).K0()
+
+    def test_sans_temperature_DrG0_demande_T(self, nh3):
+        with pytest.raises(ValueError, match="demande la température"):
+            Systeme(nh3, {"N2": 1}).DrG0()
+
+    def test_K0_independante_de_T_se_passe_de_T(self, esterification):
+        assert esterification.K0() == pytest.approx(4.0)
+
+    def test_DrG_coherent_avec_DrG0(self, nh3_scripts):
+        xi = 0.1
+        attendu = nh3_scripts.DrG0() + R * 400 * np.log(nh3_scripts.Q(xi))
+        assert nh3_scripts.DrG(xi) == pytest.approx(attendu, rel=1e-12)

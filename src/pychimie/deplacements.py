@@ -80,7 +80,7 @@ def perturber(
         avant=avant,
         systeme=perturbe,
         Q=float(perturbe.Q(0.0)),
-        K0=perturbe.K0,
+        K0=float(perturbe.K0()),
         apres=perturbe.etat_final(),
     )
 

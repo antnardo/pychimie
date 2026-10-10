@@ -41,11 +41,18 @@ comme un autre : donner sa quantité (55,5 mol pour un litre d'eau).
 
 ### Système, état final, rupture
 
+Unités : quantités en mol, `T` en K, `P` en bar (P° = 1 bar), volumes en L
+(c° = 1 mol/L). Une pression au-delà de 10⁴ bar ou une température au-dessous de
+100 K est refusée, avec la conversion dans le message : `P=200e5` (des pascals) et
+`T=25` (des degrés Celsius) ne passent pas en silence.
+
 `Systeme(reaction, initial, T=…, P=…, V=…, V_gaz=…, inertes=…)` : `P` est la pression
 imposée (bar), `V` le volume de la solution (L) quand il y a des solutés, `V_gaz` le
 volume du gaz s'il est fixé à la place de P, `inertes` les constituants inactifs
 (`{"Ar(g)": 1}`).
 
+- `K0()`, `DrG0()` : K° et ΔrG° à la température du système ; `K0(T)`, `DrG0(T)` à
+  une autre, comme `Reaction.K0(T)`.
 - `xi_min`, `xi_max`, `avancements()`, `n(nom, ξ)`, `activite(nom, ξ)`, `Q(ξ)`,
   `DrG(ξ)`, `G(ξ)` (à une constante près : G(0) = 0), `minimum_G()`.
 - `etat_final()` : avancement, quantités, fractions molaires, Q et K°, et, en cas de

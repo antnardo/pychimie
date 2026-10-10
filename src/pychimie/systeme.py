@@ -18,8 +18,9 @@ deux bornes, parce qu'elle découle de la seule monotonie de ΔrG.
 **Précision.** On cherche la racine depuis la borne la plus proche, en paramétrant
 ξ = borne ∓ u et en calculant les quantités comme m + νu, où m vaut exactement zéro
 pour les constituants qui s'annulent à la borne. Avec K° = 10²⁴ (2 SO₂ + O₂ à 298 K),
-il reste 10⁻¹² mol de SO₂, que ξ = 1 − 10⁻¹² ne distinguerait pas de zéro : ces
-quantités-là sont exactes à la précision de la machine, et u se cherche en logarithme.
+il reste 2,5·10⁻⁸ mol de SO₂ : calculée comme 2 − 2ξ avec ξ = 1 − 1,3·10⁻⁸, cette
+quantité n'aurait que huit chiffres justes ; calculée comme 2u, elle est exacte à la
+précision de la machine, et u se cherche en logarithme.
 
 **G(ξ).** Plutôt que d'intégrer ΔrG (l'ancien ``compute_G`` appelait ``quad`` et
 plantait sur le tuple qu'il rend), G se calcule en forme close :
@@ -32,7 +33,9 @@ gaz à volume fixé), le terme −nᵢ compense la dérivée de nᵢ ln nᵢ. À
 la fonction minimale est l'énergie libre F ; G(ξ) rend alors F(ξ) − F(0), de même
 dérivée.
 
-Les quantités sont en mol, P en bar (P° = 1 bar), V en L (c° = 1 mol/L).
+Les quantités sont en mol, T en K, P en bar (P° = 1 bar), V en L (c° = 1 mol/L). Une
+pression au-delà de 10⁴ bar ou une température au-dessous de 100 K est refusée : ce
+sont presque toujours des pascals ou des degrés Celsius donnés par mégarde.
 """
 
 import math
@@ -43,9 +46,8 @@ from typing import Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.constants import R
-from scipy.optimize import brentq, minimize_scalar
 
-from pychimie._calcul import Flottants, sortie
+from pychimie._calcul import Flottants, sortie, temperatures
 from pychimie.equation import Constituant, indice
 from pychimie.reaction import Reaction
 
@@ -53,6 +55,7 @@ __all__ = ["EtatFinal", "RuptureEquilibre", "Systeme"]
 
 P_STANDARD = 1e5  # Pa ; les pressions de pychimie sont en bar, P° = 1 bar.
 C_STANDARD = 1.0  # mol/L
+P_MAX = 1e4  # bar : au-delà, la pression a toutes les chances d'être en pascals.
 _EPS = np.finfo(float).eps
 
 Tableau = NDArray[np.float64]
@@ -155,6 +158,13 @@ class Systeme:
         for nom, valeur in (("T", T), ("P", P), ("V", V), ("V_gaz", V_gaz)):
             if valeur is not None and valeur <= 0:
                 raise ValueError(f"{nom} doit être strictement positif")
+        if T is not None:
+            temperatures(T)  # refuse T < 100 K : des degrés Celsius ?
+        if P > P_MAX:
+            raise ValueError(
+                f"P est en bar : {P:g} bar ? Une pression en pascals se divise par 1e5 "
+                f"({P:g} Pa = {P / 1e5:g} bar)"
+            )
         tous = (*constituants, *(c for c, _ in liste_inertes))
         if V is None and any(c.etat == "aq" for c in tous):
             raise ValueError("des solutés : donner le volume V de la solution (L)")
@@ -207,15 +217,17 @@ class Systeme:
         nu, n0 = self._nu[: self._r], self._n0[: self._r]
         return float(np.max(-n0[nu > 0] / nu[nu > 0])) + 0.0
 
-    @property
-    def K0(self) -> float:
-        """K° à la température du système."""
-        return float(self.reaction.K0(self.T))
+    def K0(self, T: ArrayLike | None = None) -> Flottants:
+        """K° à la température du système, ou à ``T`` (K) : ``s.K0()``, ``s.K0(800)``.
 
-    @property
-    def DrG0(self) -> float:
-        """ΔrG° à la température du système (J/mol)."""
-        return float(self.reaction.DrG0(self._T_requis("ΔrG°")))
+        Même signature que :meth:`Reaction.K0`, dont c'est le raccourci : sans ``T``,
+        la température est celle du système (``Systeme(..., T=...)``).
+        """
+        return self.reaction.K0(self.T if T is None else T)
+
+    def DrG0(self, T: ArrayLike | None = None) -> Flottants:
+        """ΔrG° (J/mol) à la température du système, ou à ``T`` (K)."""
+        return self.reaction.DrG0(self._T_requis("ΔrG°") if T is None else T)
 
     def avancements(
         self, n: int = 2000, *, debut: float | None = None, fin: float | None = None
@@ -261,14 +273,14 @@ class Systeme:
         """ΔrG(ξ) = ΔrG° + RT ln Q(ξ) (J/mol) : négatif, la réaction avance."""
         T = self._T_requis("ΔrG(ξ)")
         x, forme = _grille(xi)
-        return sortie((self.DrG0 + R * T * self._ln_Q(self._quantites(x))).reshape(forme))
+        return sortie((self.DrG0() + R * T * self._ln_Q(self._quantites(x))).reshape(forme))
 
     def G(self, xi: ArrayLike) -> Flottants:
         """G(ξ) − G(0) (J), à T et P fixées ; F(ξ) − F(0) à volume de gaz fixé."""
         T = self._T_requis("G(ξ)")
         x, forme = _grille(xi)
         phi = self._phi(self._quantites(x)) - self._phi(self._n0[:, None])
-        return sortie((x * self.DrG0 + R * T * phi).reshape(forme))
+        return sortie((x * self.DrG0() + R * T * phi).reshape(forme))
 
     def minimum_G(self) -> tuple[float, float]:
         """(ξ, G) au minimum de G, cherché directement, sans passer par Q = K°.
@@ -276,6 +288,8 @@ class Systeme:
         C'est l'autre lecture de l'état final : le minimum de G est l'équilibre, ou la
         borne d'une rupture. La précision est celle d'une minimisation, ~10⁻⁸ en ξ.
         """
+        from scipy.optimize import minimize_scalar  # 0,25 s d'import, pour ce seul usage
+
         a, b = self.xi_min, self.xi_max
         if b <= a:
             return 0.0, 0.0
@@ -323,7 +337,12 @@ class Systeme:
             s_bas -= 25.0
             if U * math.exp(s_bas) == 0:  # K° hors des flottants : équilibre sur la borne
                 return self._etat(borne, m, ln_K, equilibre=True)
-        s = 0.0 if cote * h(0.0) >= 0 else brentq(h, s_bas, 0.0, xtol=1e-15, rtol=4 * _EPS)
+        if cote * h(0.0) >= 0:
+            s = 0.0
+        else:
+            from scipy.optimize import brentq  # chargé à la première résolution seulement
+
+            s = brentq(h, s_bas, 0.0, xtol=1e-15, rtol=4 * _EPS)
         u = U * math.exp(s)
         return self._etat(borne - cote * u, m + d * u, ln_K, equilibre=True)
 

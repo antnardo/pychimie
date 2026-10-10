@@ -142,9 +142,19 @@ couples acide-base : les équilibres en solution (pH, titrages) relèvent de ce 
 ### Tableau périodique en TikZ
 
 `TableauTikz` produit, élément par élément, les commandes qu'un gabarit TikZ met en
-forme : cases stylées selon un attribut (`famille=halogène`), ombrées selon une
-propriété numérique (`chi=73`), symboles en hyperliens vers Wikipédia, informations
-et légende.
+forme. Chaque méthode ajoute une couche pour les 118 éléments, dans l'ordre d'appel :
+
+- `cases("famille")` : une case par élément, stylée par la valeur d'un attribut
+  qualitatif (`\dessinecase[famille=halogène]{17-2}`) ;
+- `ombrage("electronegativite", "chi")` : une case par élément, ombrée selon une
+  propriété numérique ramenée à un entier de 0 à 100 et passée en argument d'un style
+  (`\dessinecase[chi=73]{17-2}`) ; `bornes=(0, 4)` fixe l'échelle, `defaut="sans chi"`
+  habille les éléments sans valeur ;
+- `symboles("etat")` : le symbole, en hyperlien vers Wikipédia FR si `liens=True`,
+  stylé comme une case ;
+- `infos(attribut, style, format)` : une information par case, avec un modèle
+  (`r"\num{{{}}}"`) ou une fonction de la valeur ;
+- `legende("famille", …)` : une entrée `\legend` ou `\legendhoriz` par valeur.
 
 ```python
 from pychimie import FAMILLES, TableauTikz
@@ -153,13 +163,34 @@ t = TableauTikz(liens=True).cases("famille").symboles("etat")
 t.infos("masse_molaire", "M info", r"\num{{{}}}").infos("nom", "nom").infos("Z", "Z")
 t.legende("famille", ligne=1, horizontale=True, valeurs=FAMILLES)
 t.ecrire("simple_metaux.tex")
+
+ombre = TableauTikz(liens=False).ombrage("electronegativite", "chi", bornes=(0, 4), defaut="sans chi")
+ombre.symboles().infos("electronegativite", "chi info", r"\num{{{}}}").ecrire("ombrage_chi.tex")
 ```
 
-Le gabarit `exemples/periodikz/Tableau_simple_metaux.tex` définit les coordonnées
-(`<groupe>-<période>`, `<rang>-L` et `<rang>-A` pour le bloc f), les commandes
-`\dessinecase`, `\legend`, `\legendhoriz` et les styles. Pour le paquet LaTeX
-pgf-PeriodicTable, `schema_categories` et `schema_degrade` écrivent un
-`\pgfPTnewColorScheme` (exemple : `exemples/periodikz/pgf_electronegativite.py`).
+Le gabarit définit les coordonnées (`<groupe>-<période>`, `<rang>-L` et `<rang>-A`
+pour le bloc f), la commande `\dessinecase`, les styles, et pour les légendes
+`\legend` et `\legendhoriz`. Un attribut qualitatif se style par un choix, un ombrage
+par un **style à argument**, où `#1` est la valeur de 0 à 100 :
+
+```latex
+\begin{tikzpicture}[
+  famille/.is choice,
+  famille/halogène/.style={fill=yellow!80!white!90!red},
+  chi/.style={fill=red!#1!blue!60!white},   % \dessinecase[chi=73]{17-2}
+  sans chi/.style={fill=black!10, densely dotted},
+]
+\input{ombrage_chi}
+\end{tikzpicture}
+```
+
+Deux gabarits complets sont dans `exemples/periodikz/` : `Tableau_simple_metaux.tex`
+(familles, états, masses, légende horizontale ; produit par `simple_metaux.py`) et
+`Tableau_ombrage_chi.tex` (électronégativité en dégradé avec sa barre d'échelle ;
+produit par `ombrage_chi.py`). Pour le paquet LaTeX pgf-PeriodicTable, qui dessine
+lui-même symboles et informations, `schema_categories` et `schema_degrade` sont les
+pendants de `cases` et `ombrage` : ils écrivent un `\pgfPTnewColorScheme` (exemple :
+`pgf_electronegativite.py` et `Tableau_pgf_electronegativite.tex`).
 
 ### Régénérer la table
 
@@ -167,6 +198,20 @@ pgf-PeriodicTable, `schema_categories` et `schema_degrade` écrivent un
 uv run python scripts/telecharger_ciaaw.py
 uv run --group donnees python scripts/generer_elements.py
 ```
+
+## Pour plus tard
+
+Un `Systeme` évolue par **une seule** réaction. Les sujets qui couplent plusieurs
+équilibres — la réduction de FeO par CO en présence de l'équilibre de Boudouard
+(`Exercices/Exos/ThermoChimie/TC-E08` : deux constantes à 1000 K, un volume fixé, les
+volumes critiques où un solide disparaît) — demandent un vecteur d'avancements
+(ξ₁, …, ξₖ) : les quantités deviennent nᵢ = nᵢ,₀ + Σⱼ νᵢⱼ ξⱼ, l'état final est le
+minimum de G(ξ₁, …, ξₖ) sur le polytope où toutes les quantités restent positives, et
+une rupture d'équilibre est l'arrivée sur une face de ce polytope. L'extension
+naturelle est une classe `Systeme` à plusieurs `Reaction` partageant les mêmes
+constituants, avec le même `etat_final()` (minimisation convexe sous contraintes, à la
+place de la dichotomie sur ξ) et les mêmes `perturber`/`balayage` ; `TC-E08.py` en
+est le cas d'usage à reproduire. Rien n'est commencé.
 
 ## Licence
 

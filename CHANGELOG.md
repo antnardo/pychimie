@@ -60,7 +60,9 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
   vers Wikipédia FR, informations, légende).
 - `pychimie.pgfperiodictable` : schémas `\pgfPTnewColorScheme` pour le paquet
   LaTeX pgf-PeriodicTable.
-- Exemples dans `exemples/periodikz` et `exemples/formules`.
+- Exemples dans `exemples/periodikz` (dont le gabarit d'ombrage
+  `Tableau_ombrage_chi.tex` et son script `ombrage_chi.py`, avec le style TikZ à
+  argument) et `exemples/formules`.
 
 ### Corrigé
 

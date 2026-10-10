@@ -14,7 +14,7 @@ gardés.
 | `src/pychimie/donnees/elements.csv` | oui | 118 éléments, 26 colonnes | `scripts/generer_elements.py` |
 | `scripts/sources/noms_fr.csv` | non | Z, symbole, nom français | extraction unique de l'ancien `atomes.csv` |
 | `scripts/sources/ciaaw_2024_abrege.csv` | non | masses atomiques standard abrégées | `scripts/telecharger_ciaaw.py` |
-| `src/pychimie/donnees/thermo298.csv` | oui | ΔfH°, S°m, C°p à 298,15 K, 26 espèces | `scripts/ecrire_donnees_thermo.py` |
+| `src/pychimie/donnees/thermo298.csv` | oui | ΔfH°, S°m, C°p à 298,15 K, 127 espèces | `scripts/ecrire_donnees_thermo.py` |
 | `src/pychimie/donnees/LICENSE-mendeleev.txt` | oui | licence MIT de mendeleev | copie de sa distribution |
 
 Pour régénérer la table :
@@ -114,16 +114,50 @@ relance, jamais le CSV à la main.
 
 ### Espèces
 
-Celles des exercices d'équilibre de CPGE : N₂, H₂, O₂, NH₃, H₂O (liquide et gaz), CO,
-CO₂, C (graphite), CH₄, CH₃OH (liquide et gaz), SO₂, SO₃, NO₂, N₂O₄, CaCO₃ (calcite),
-CaO, Fe, FeO, Fe₂O₃, Fe₃O₄, Cu, CuO, Zn, ZnO. La colonne `phase` vaut `g`, `l` ou `s` ;
-`C(s)` est le graphite, état standard de référence du carbone.
+127 espèces, dont 13 sans C°p :
+
+- gaz simples et composés de l'azote, du soufre et du phosphore : N₂, H₂, O₂, Ar, He,
+  NH₃, NO, NO₂, N₂O, N₂O₄, HNO₃(l), NH₄Cl, NH₄NO₃, urée, S, H₂S, SO₂, SO₃, H₂SO₄(l),
+  P, PCl₃, PCl₅ ;
+- eau (liquide et vapeur), halogènes et hydracides : F₂, Cl₂, Br₂ (liquide et gaz),
+  I₂ (solide et gaz), HF, HCl, HBr, HI ;
+- carbone et composés organiques jusqu'à C₂, où s'arrête la table NBS : C (graphite),
+  CO, CO₂, CH₄, C₂H₂, C₂H₄, C₂H₆, CH₃OH et C₂H₅OH (liquide et gaz), CH₃CHO(g),
+  CH₃COOH(l) ;
+- métaux, oxydes, sulfures et sels : Na, NaCl, NaOH, Na₂CO₃, NaHCO₃, K, KCl, Mg, MgO,
+  Ca, CaO, Ca(OH)₂, CaCO₃, CaCl₂, CaSO₄, BaSO₄, Al, Al₂O₃, Si, SiO₂, Ti, TiO₂, Cr,
+  Cr₂O₃, Mn, MnO, MnO₂, Fe, FeO, Fe₂O₃, Fe₃O₄, FeS₂, Ni, NiO, Cu, Cu₂O, CuO, CuSO₄,
+  CuSO₄·5H₂O, Zn, ZnO, ZnS, Ag, Ag₂O, AgCl, Sn, SnO₂, Pb, PbO, PbO₂, Hg, HgO ;
+- espèces en solution aqueuse : H⁺, OH⁻, Na⁺, K⁺, Mg²⁺, Ca²⁺, Ba²⁺, Al³⁺, Fe²⁺, Fe³⁺,
+  Cu²⁺, Zn²⁺, Ag⁺, Pb²⁺, NH₄⁺, F⁻, Cl⁻, Br⁻, I⁻, NO₃⁻, SO₄²⁻, CO₃²⁻, HCO₃⁻, MnO₄⁻,
+  CH₃COO⁻, CH₃COOH, NH₃, CO₂.
+
+Conventions :
+
+- une seule variété par espèce condensée, celle de l'état standard de référence ou
+  la plus courante : graphite pour C (le diamant aurait la même clé `C(s)`), soufre
+  rhombique, phosphore blanc, étain blanc, quartz α, rutile, corindon, anhydrite,
+  blende, pyrite, PbO jaune, HgO rouge ;
+- les espèces `aq` sont à l'état standard de la table NBS, la solution idéale
+  hypothétique à 1 mol/kg, que le cours prend pour c° = 1 mol/L (l'écart, RT ln ρ_eau,
+  vaut 7 J/mol) ; les grandeurs des ions reposent sur la convention
+  ΔfH° = S° = C°p = 0 pour H⁺(aq) ;
+- la table NBS ne donne pas de C°p pour la plupart des ions : la cellule est vide,
+  `Cp0` vaut `None`, et `Reaction.depuis_tables(kirchhoff=True)` refuse l'espèce.
+
+Les formules se lisent avec `pychimie.formules` et s'écrivent comme dans une équation
+(`SO4^2-(aq)`, `Fe^3+(aq)`, `CuSO4·5H2O(s)`).
+
+Écartées faute d'une valeur sûre dans ces éditions : propane, butane, benzène et
+glucose (absents de la table NBS, qui s'arrête aux C₂ ; les valeurs de Pedley 1986 et
+des tables TRC diffèrent de l'ordre du kJ/mol), éthanal liquide (sans C°p dans la table
+NBS).
 
 ### Sources
 
 | Code | Référence | Espèces |
 | --- | --- | --- |
-| `NBS82` | D. D. Wagman, W. H. Evans, V. B. Parker, R. H. Schumm, I. Halow, S. M. Bailey, K. L. Churney, R. L. Nuttall, *The NBS tables of chemical thermodynamic properties. Selected values for inorganic and C1 and C2 organic substances in SI units*, J. Phys. Chem. Ref. Data 11, suppl. 2 (1982) | toutes sauf FeO |
+| `NBS82` | D. D. Wagman, W. H. Evans, V. B. Parker, R. H. Schumm, I. Halow, S. M. Bailey, K. L. Churney, R. L. Nuttall, *The NBS tables of chemical thermodynamic properties. Selected values for inorganic and C1 and C2 organic substances in SI units*, J. Phys. Chem. Ref. Data 11, suppl. 2 (1982) | toutes sauf FeO (126 espèces) |
 | `JANAF98` | M. W. Chase Jr., *NIST-JANAF Thermochemical Tables*, 4e édition, J. Phys. Chem. Ref. Data, monographie 9 (1998) | FeO |
 
 Les tables NBS sont celles que reprennent les manuels (et les annexes de l'Atkins) ; les
@@ -131,13 +165,20 @@ scripts de cours en tirent leurs valeurs — pour l'équilibre de Boudouard, Δr
 172,5 kJ/mol et ΔrS° = 175,8 J/K/mol. Elles ne donnent pour FeO que ΔfH° : la ligne
 entière vient alors de JANAF, pour ne pas mêler deux tables dans une même espèce. D'une
 table à l'autre, les valeurs diffèrent couramment de quelques dixièmes de kJ/mol et de
-quelques dixièmes de J/K/mol (CODATA 1989 donne par exemple S°(CaO) = 38,1 J/K/mol, la
-table NBS 39,75).
+quelques dixièmes de J/K/mol (les *CODATA key values* de 1989 — J. D. Cox, D. D.
+Wagman, V. A. Medvedev, *CODATA Key Values for Thermodynamics*, Hemisphere, 1989 —
+donnent par exemple S°(CaO) = 38,1 J/K/mol, la table NBS 39,75) ; on n'a pas mêlé les
+deux.
+
+Vérification par la loi de Hess (`tests/test_donnees.py`) : H₂ + Cl₂ → 2 HCl, −184,6
+kJ/mol ; thermite 2 Al + Fe₂O₃, −851,5 kJ/mol ; dissolution de NaCl, +3,9 kJ/mol ;
+neutralisation H⁺ + OH⁻, −55,8 kJ/mol ; PCl₅ → PCl₃ + Cl₂, 87,9 kJ/mol et
+170,3 J/K/mol ; pKs(AgCl) = 9,75, pKe = 14,00, pKs(CaCO₃) = 8,3 à 298 K.
 
 ### Licence
 
 Les valeurs numériques sont des faits mesurés, que le droit d'auteur ne protège pas.
-Les 26 lignes retenues, trois grandeurs chacune, ne sont pas une partie substantielle
+Les 127 lignes retenues, trois grandeurs chacune, ne sont pas une partie substantielle
 des tables d'origine au sens du droit des bases de données (articles L.342-1 et
 suivants du code de la propriété intellectuelle, directive 96/9/CE). Le fichier
 `thermo298.csv` se diffuse donc librement avec `pychimie`, sous la licence du dépôt,

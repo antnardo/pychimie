@@ -93,18 +93,28 @@ class Reaction:
         """ΔrH°, ΔrS° (et ΔrC°p si ``kirchhoff``) par la loi de Hess, à 298,15 K.
 
         ΔrX° = Σ νᵢ X°ᵢ, avec ΔfH° pour H, S°m pour S et C°p,m pour Cp. Sans
-        ``kirchhoff``, ΔrC°p est mis à zéro : approximation d'Ellingham.
+        ``kirchhoff``, ΔrC°p est mis à zéro : approximation d'Ellingham. Avec, chaque
+        espèce doit avoir un C°p dans la table (la plupart des ions aqueux n'en ont pas).
         """
         if isinstance(equation, str):
             equation = Equation.lire(equation)
         table = table_thermo() if table is None else table
         donnees = [table[c] for c in equation.constituants]
         nu = equation.nu
+        DrCp0 = 0.0
+        if kirchhoff:
+            sans_cp = [d.cle for d in donnees if d.Cp0 is None]
+            if sans_cp:
+                raise ValueError(
+                    f"pas de C°p dans la table pour {', '.join(sans_cp)} : Kirchhoff impossible, "
+                    "rester en approximation d'Ellingham (kirchhoff=False)"
+                )
+            DrCp0 = _somme(nu, [d.Cp0 for d in donnees if d.Cp0 is not None])
         return cls(
             equation,
             DrH0=_somme(nu, [d.DfH0 for d in donnees]),
             DrS0=_somme(nu, [d.Sm0 for d in donnees]),
-            DrCp0=_somme(nu, [d.Cp0 for d in donnees]) if kirchhoff else 0.0,
+            DrCp0=DrCp0,
             T_ref=TableThermo.T_REF,
         )
 

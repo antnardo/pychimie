@@ -6,8 +6,11 @@ dans ``donnees/SOURCES.md``. Les grandeurs sont rendues en unités SI (J/mol, J/
 le kJ/mol des tables ne sort pas de ce module.
 
 Une espèce se cherche par ``"formule(phase)"`` (``"H2O(g)"``, ``"C(s)"`` pour le
-graphite). Une phase étiquetée (``l1``, ``s2``) se cherche sous sa phase nue : les
-grandeurs standard sont celles du corps pur.
+graphite, ``"SO4^2-(aq)"`` pour un ion). Une phase étiquetée (``l1``, ``s2``) se cherche
+sous sa phase nue : les grandeurs standard sont celles du corps pur. Les espèces ``aq``
+sont à l'état standard des tables (solution idéale à 1 mol/kg, prise pour
+c° = 1 mol/L), avec la convention ΔfH° = S° = C°p = 0 pour H⁺(aq) ; la plupart des
+ions n'ont pas de C°p dans la table : ``Cp0`` vaut alors ``None``.
 """
 
 import csv
@@ -31,7 +34,8 @@ class DonneesThermo:
     nom: str
     DfH0: float
     Sm0: float
-    Cp0: float
+    Cp0: float | None
+    """``None`` quand la table ne le donne pas (la plupart des ions aqueux)."""
     source: str
 
     @property
@@ -65,7 +69,7 @@ class TableThermo:
                     nom=ligne["nom"],
                     DfH0=float(ligne["DfH0_kJ_mol"]) * 1e3,
                     Sm0=float(ligne["Sm0_J_K_mol"]),
-                    Cp0=float(ligne["Cp0_J_K_mol"]),
+                    Cp0=float(ligne["Cp0_J_K_mol"]) if ligne["Cp0_J_K_mol"] != "" else None,
                     source=ligne["source"],
                 )
                 for ligne in lignes
@@ -81,6 +85,10 @@ class TableThermo:
             raise KeyError(
                 f"{cle} n'est pas dans la table ({len(self)} espèces : {', '.join(self._especes)})"
             ) from None
+
+    def cles(self) -> tuple[str, ...]:
+        """Les clés ``"formule(phase)"`` des espèces, dans l'ordre de la table."""
+        return tuple(self._especes)
 
     def __contains__(self, cle: object) -> bool:
         return cle in self._especes

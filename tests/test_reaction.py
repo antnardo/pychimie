@@ -38,7 +38,7 @@ class TestHess:
 
     def test_espece_absente_des_tables(self):
         with pytest.raises(KeyError):
-            Reaction.depuis_tables("NH4Cl(s) = NH3(g) + HCl(g)")
+            Reaction.depuis_tables("XeF4(g) = Xe(g) + 2 F2(g)")
 
     def test_autre_table(self):
         table = table_thermo()

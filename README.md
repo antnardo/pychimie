@@ -75,12 +75,19 @@ d'équilibre et la rupture d'équilibre du carbonate de calcium.
 
 ### Données
 
-`src/pychimie/donnees/thermo298.csv` donne ΔfH°, S°m et C°p à 298,15 K pour les 26
-espèces des exercices d'équilibre (N₂, H₂, O₂, NH₃, H₂O, CO, CO₂, C, CH₄, CH₃OH, SO₂,
-SO₃, NO₂, N₂O₄, CaCO₃, CaO, Fe et ses oxydes, Cu, CuO, Zn, ZnO). Les valeurs viennent des
-tables NBS (Wagman et al., 1982) et, pour FeO, des tables NIST-JANAF (Chase, 1998) ;
-`src/pychimie/donnees/SOURCES.md` donne les références et la licence. Le fichier est
-écrit par `scripts/ecrire_donnees_thermo.py`.
+`src/pychimie/donnees/thermo298.csv` donne ΔfH°, S°m et C°p à 298,15 K pour 127
+espèces : gaz simples et composés de l'azote, du soufre et du phosphore (NH₃, NO,
+NO₂, N₂O₄, SO₂, SO₃, H₂S, H₂SO₄, HNO₃, PCl₃, PCl₅, NH₄Cl, urée…), halogènes et
+hydracides, le carbone et ses composés jusqu'à C₂ (CO, CO₂, CH₄, C₂H₂, C₂H₄, C₂H₆,
+méthanol, éthanol, éthanal, acide éthanoïque), les métaux usuels avec leurs oxydes,
+sulfures et sels (Na, K, Mg, Ca, Al, Si, Ti, Cr, Mn, Fe, Ni, Cu, Zn, Ag, Sn, Pb, Hg),
+et 28 espèces en solution aqueuse (H⁺ par convention, OH⁻, Na⁺, Cl⁻, SO₄²⁻, Fe²⁺,
+Fe³⁺, MnO₄⁻, CH₃COO⁻…) à l'état standard c° = 1 mol/L. Les valeurs viennent des tables
+NBS (Wagman et al., 1982) et, pour FeO, des tables NIST-JANAF (Chase, 1998) ; la
+plupart des ions n'ont pas de C°p dans ces tables (`Cp0` vaut `None`, et
+`depuis_tables(kirchhoff=True)` le dit). `src/pychimie/donnees/SOURCES.md` donne les
+références, les conventions, ce qui a été écarté faute de valeur sûre, et la licence.
+Le fichier est écrit par `scripts/ecrire_donnees_thermo.py`.
 
 ## Éléments, formules et tableau périodique
 

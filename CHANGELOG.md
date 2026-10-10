@@ -25,9 +25,14 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
     `pychimie` passe de 0,50 s à 0,26 s ;
   - `perturber` et `balayage` : déplacements d'équilibre par T, P, ajout d'un
     constituant actif ou inactif, proportions initiales.
-- Table de ΔfH°, S°m et C°p à 298,15 K pour 26 espèces (tables NBS 1982, NIST-JANAF
-  1998 pour FeO), écrite par `scripts/ecrire_donnees_thermo.py`, sources et licence
-  dans `src/pychimie/donnees/SOURCES.md`.
+- Table de ΔfH°, S°m et C°p à 298,15 K pour 127 espèces des sujets de CPGE (tables
+  NBS 1982, NIST-JANAF 1998 pour FeO) : gaz, halogènes et hydracides, composés du
+  carbone jusqu'à C₂, métaux usuels avec oxydes, sulfures et sels, 28 espèces
+  aqueuses (convention H⁺ ; C°p absent pour la plupart des ions, `Cp0` vaut alors
+  `None` et `depuis_tables(kirchhoff=True)` refuse). Écrite par
+  `scripts/ecrire_donnees_thermo.py`, sources, conventions et licence dans
+  `src/pychimie/donnees/SOURCES.md` ; la loi de Hess y est vérifiée contre les
+  valeurs de cours de neuf réactions et trois constantes. `TableThermo.cles()`.
 - `exemples/equilibres/` : les scripts `Optimisation_NH3_*.py` et
   `Optimisation_Boudouard.py` refaits, K°(T) avec Kirchhoff, déplacements
   d'équilibre, rupture d'équilibre du carbonate de calcium.

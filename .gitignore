@@ -15,3 +15,8 @@ build/
 *.pytxcode
 *.synctex.gz
 *.pdf
+# sorties TikZ produites par les scripts de exemples/periodikz/ (les gabarits sont
+# les Tableau_*.tex) et par les scripts de cours (*.atomes.tex)
+exemples/periodikz/*.tex
+!exemples/periodikz/Tableau_*.tex
+*.atomes.tex

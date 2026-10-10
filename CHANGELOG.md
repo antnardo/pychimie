@@ -3,7 +3,7 @@
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
 [versionnage sémantique](https://semver.org/lang/fr/).
 
-## [Unreleased]
+## [0.1.0] - 2026-10-10
 
 ### Ajouté
 
@@ -90,6 +90,8 @@ Par rapport à `chimie/atomes.py`, `chimie/periodikz.py` et `chimie/atomes.csv` 
 - `exemples/titrages/` et `tests/test_migration_titrages.py`, qui ne concernaient que
   le paquet `titrages` : déposés dans son dépôt (`examples/07_…` à `11_…`,
   `tests/test_migration_chimie.py`), avec la dépendance de développement `titrages`.
+- Les sorties TikZ des exemples (`exemples/periodikz/simple_metaux.tex`,
+  `schemas_pgfpt.tex`) ne sont plus suivies par git : les scripts les régénèrent.
 - `chimie/thermochimie.py`.
 - `chimie/atomes.py`, `chimie/atomes.csv` (données d'origine Wikipédia),
   `chimie/periodikz.py`, `chimie/composes.py`, `chimie/composes.csv`,

@@ -115,7 +115,7 @@ masse_a_peser("CuSO4·5H2O", 0.10, 0.1)  # 2.50 g pour 100 mL à 0,10 mol/L
 Preparation.commerciale("H2SO4", 0.96, 1.84).concentration  # 18.0 mol/L
 ```
 
-Les hydrates (`·`, `.` ou `*`), les parenthèses et crochets imbriqués, les indices et
+Les hydrates (`·`, `.`, `*` ou la virgule française : `CuSO4, 5 H2O`), les parenthèses et crochets imbriqués, les indices et
 exposants Unicode sont lus ; une charge s'écrit `^2-`, `²⁻` ou, pour ±1, d'un signe
 seul (`NH4+`) ; une phase finale `(s)`, `(l)`, `(g)` ou `(aq)` est gardée à part
 (`Formule.phase`). `Preparation` (masse à peser, volume à prélever, solution du

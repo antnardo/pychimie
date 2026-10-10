@@ -173,6 +173,10 @@ class TestAcces:
         with pytest.raises(KeyError, match="inconnu"):
             tableau["Xy"]
 
+    def test_element_inconnu_montre_l_entree_d_origine(self, tableau):
+        with pytest.raises(KeyError, match=r"'FE'.*casse"):
+            tableau["FE"]
+
     def test_cle_sans_accents(self):
         assert element("Hélium").cle == "helium"
 

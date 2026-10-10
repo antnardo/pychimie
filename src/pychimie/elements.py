@@ -197,12 +197,16 @@ class TableauPeriodique:
         )
 
     def __getitem__(self, cle: int | str) -> Element:
+        demande = cle
         if isinstance(cle, str) and cle not in self._index:
             cle = _cle(cle)
         try:
             return self._index[cle]
         except KeyError:
-            raise KeyError(f"élément inconnu : {cle!r}") from None
+            raise KeyError(
+                f"élément inconnu : {demande!r} (un numéro atomique, un symbole avec sa casse "
+                "comme « Fe », ou un nom français, sans tenir compte de la casse ni des accents)"
+            ) from None
 
     def __contains__(self, cle: object) -> bool:
         try:

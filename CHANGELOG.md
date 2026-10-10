@@ -31,11 +31,13 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
   `scripts/`. mendeleev n'est qu'une dépendance du groupe `donnees`.
 - `pychimie.elements` : `Element`, `TableauPeriodique`, `element()`,
   `tableau_periodique()` ; accès par Z, symbole ou nom, `filtrer`, `valeurs`,
-  `normaliser` ; températures en °C (`theta_fusion`…), caractère métallique.
+  `normaliser` ; températures en °C (`theta_fusion`…), caractère métallique. Un
+  élément inconnu est signalé par l'entrée telle qu'on l'a écrite, avec la règle
+  de recherche.
 - `pychimie.formules` : analyseur de formules brutes (parenthèses imbriquées,
-  hydrates, charges, indices et exposants Unicode, phase finale `(s)`, `(l)`, `(g)`
-  ou `(aq)` gardée dans `Formule.phase`), masse molaire, fractions massiques,
-  notation de Hill.
+  hydrates avec `·`, `.`, `*` ou la virgule française, charges, indices et exposants
+  Unicode, phase finale `(s)`, `(l)`, `(g)` ou `(aq)` gardée dans `Formule.phase`),
+  masse molaire, fractions massiques, notation de Hill.
 - `pychimie.preparation` : `Preparation` (masse à peser, volume à prélever, solution
   du commerce : titre massique et densité) — nommée ainsi pour ne pas se confondre
   avec `titrages.Solution`, qui décrit une solution par ses couples acide-base.

@@ -5,7 +5,7 @@ classe :
 
 .. code-block:: text
 
-    formule  := partie (séparateur partie)* phase?   séparateur : · • ⋅ . *
+    formule  := partie (séparateur partie)* phase?   séparateur : · • ⋅ . * ,
     partie   := coefficient? groupe+ charge?         « 5H2O »
     groupe   := (symbole | (groupe+) | [groupe+] | {groupe+}) nombre?
     charge   := ^? nombre? signe | exposants          « SO4^2- », « NH4+ », « Fe³⁺ »
@@ -46,7 +46,9 @@ PHASES = {
 }
 _PHASE_FINALE = re.compile(r"^(?P<formule>.+?)\s*\((?P<phase>s|l|g|aq)\)$")
 
-SEPARATEURS = frozenset("·•⋅.*")
+# Le point médian des manuels, le point et l'étoile du clavier, la virgule des
+# étiquettes françaises (« CuSO4, 5 H2O »).
+SEPARATEURS = frozenset("·•⋅.*,")
 OUVRANTES = {"(": ")", "[": "]", "{": "}"}
 SIGNES = {"+": 1, "-": -1, "−": -1}
 INDICES = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")

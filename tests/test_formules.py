@@ -39,6 +39,45 @@ class TestComposition:
         assert f.atomes == 24
 
 
+class TestPhase:
+    @pytest.mark.parametrize(
+        ("texte", "formule", "phase"),
+        [
+            ("H2O(l)", "H2O", "l"),
+            ("CO2(g)", "CO2", "g"),
+            ("NaCl(s)", "NaCl", "s"),
+            ("Cu^2+(aq)", "Cu^2+", "aq"),
+            ("SO₄²⁻(aq)", "SO₄²⁻", "aq"),
+            ("H2O (g)", "H2O", "g"),
+            ("Ca(OH)2", "Ca(OH)2", None),
+            ("Ca(OH)2(s)", "Ca(OH)2", "s"),
+            ("CuSO4·5H2O(s)", "CuSO4·5H2O", "s"),
+        ],
+    )
+    def test_lire_separe_la_phase(self, texte, formule, phase):
+        f = Formule.lire(texte)
+        assert (f.texte, f.phase) == (formule, phase)
+
+    def test_str_reconstruit_la_notation(self):
+        assert str(Formule.lire("Cu^2+(aq)")) == "Cu^2+(aq)"
+        assert str(Formule.lire("Ca(OH)2")) == "Ca(OH)2"
+
+    def test_composition_et_charge_ignorent_la_phase(self):
+        f = Formule.lire("Fe^3+(aq)")
+        assert (dict(f.composition), f.charge, f.hill) == ({"Fe": 1}, 3, "Fe^3+")
+
+    def test_masse_molaire_avec_phase(self):
+        assert masse_molaire("H2O(l)") == pytest.approx(18.015, abs=1e-3)
+
+    def test_phase_inconnue(self):
+        with pytest.raises(ValueError, match="phase inconnue"):
+            Formule("H2O", (("H", 2), ("O", 1)), phase="vapeur")
+
+    def test_autre_parenthese_finale_refusee(self):
+        with pytest.raises(FormuleInvalide):
+            Formule.lire("H2O(vap)")
+
+
 class TestCharge:
     @pytest.mark.parametrize(
         ("texte", "charge"),

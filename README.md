@@ -102,22 +102,25 @@ sources et leurs licences — masses de la CIAAW, propriétés du paquet mendele
 (MIT), aucune donnée de Wikipédia — sont détaillées dans
 `src/pychimie/donnees/SOURCES.md`.
 
-### Formules brutes et solutions
+### Formules brutes et préparation de solutions
 
 ```python
-from pychimie import Formule, Solution, masse_a_peser, masse_molaire
+from pychimie import Formule, Preparation, masse_a_peser, masse_molaire
 
 masse_molaire("CuSO4·5H2O")  # 249.68 g/mol
 Formule.lire("K4[Fe(CN)6]").hill  # 'C6FeK4N6'
 Formule.lire("SO₄²⁻").charge  # -2
+Formule.lire("Cu^2+(aq)").phase  # 'aq'
 masse_a_peser("CuSO4·5H2O", 0.10, 0.1)  # 2.50 g pour 100 mL à 0,10 mol/L
-Solution.commerciale("H2SO4", 0.96, 1.84).concentration  # 18.0 mol/L
+Preparation.commerciale("H2SO4", 0.96, 1.84).concentration  # 18.0 mol/L
 ```
 
 Les hydrates (`·`, `.` ou `*`), les parenthèses et crochets imbriqués, les indices et
 exposants Unicode sont lus ; une charge s'écrit `^2-`, `²⁻` ou, pour ±1, d'un signe
-seul (`NH4+`). Les équilibres en solution (pH, titrages) relèvent du paquet
-`titrages`.
+seul (`NH4+`) ; une phase finale `(s)`, `(l)`, `(g)` ou `(aq)` est gardée à part
+(`Formule.phase`). `Preparation` (masse à peser, volume à prélever, solution du
+commerce) n'est pas la `Solution` de `titrages`, qui décrit une solution par ses
+couples acide-base : les équilibres en solution (pH, titrages) relèvent de ce paquet.
 
 ### Tableau périodique en TikZ
 

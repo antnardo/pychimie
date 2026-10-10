@@ -5,15 +5,18 @@ classe :
 
 .. code-block:: text
 
-    formule  := partie (séparateur partie)*        séparateur : · • ⋅ . *
-    partie   := coefficient? groupe+ charge?       « 5H2O »
+    formule  := partie (séparateur partie)* phase?   séparateur : · • ⋅ . *
+    partie   := coefficient? groupe+ charge?         « 5H2O »
     groupe   := (symbole | (groupe+) | [groupe+] | {groupe+}) nombre?
-    charge   := ^? nombre? signe | exposants        « SO4^2- », « NH4+ », « Fe³⁺ »
+    charge   := ^? nombre? signe | exposants          « SO4^2- », « NH4+ », « Fe³⁺ »
+    phase    := (s) | (l) | (g) | (aq)                « H2O(l) », « Cu^2+(aq) »
 
 Une expression régulière ne suffit pas : les parenthèses s'imbriquent
 (« K4[Fe(CN)6] »), et c'est leur multiplicateur qui fait la composition. Les indices
 et exposants Unicode (« H₂SO₄ », « SO₄²⁻ ») sont acceptés tels qu'on les copie d'un
-document.
+document. La mention de phase qui termine une espèce dans une équation (« H2O(l) »,
+« NaCl(s) ») est lue et gardée à part : seules les quatre mentions (s), (l), (g) et
+(aq) en sont une, et « Ca(OH)2 » garde ses parenthèses, qui sont celles de la formule.
 
 Une charge sans ``^`` ni exposant ne peut être qu'un signe seul : « Fe3+ » se lirait
 Fe₃⁺, et « SO42- » S O₄₂⁻. On écrit donc « Fe^3+ » ou « Fe³⁺ » ; un signe seul
@@ -21,17 +24,27 @@ Fe₃⁺, et « SO42- » S O₄₂⁻. On écrit donc « Fe^3+ » ou « Fe³⁺ 
 (0,000 55 g/mol par charge), très en deçà de l'incertitude des masses atomiques.
 """
 
+import re
 from collections import Counter
 from dataclasses import dataclass
 
 from pychimie.elements import TableauPeriodique, tableau_periodique
 
 __all__ = [
+    "PHASES",
     "AnalyseurFormule",
     "Formule",
     "FormuleInvalide",
     "masse_molaire",
 ]
+
+PHASES = {
+    "s": "solide",
+    "l": "liquide",
+    "g": "gaz",
+    "aq": "en solution aqueuse",
+}
+_PHASE_FINALE = re.compile(r"^(?P<formule>.+?)\s*\((?P<phase>s|l|g|aq)\)$")
 
 SEPARATEURS = frozenset("·•⋅.*")
 OUVRANTES = {"(": ")", "[": "]", "{": "}"}
@@ -51,15 +64,22 @@ class FormuleInvalide(ValueError):  # noqa: N818 — nom français, comme toute 
 
 @dataclass(frozen=True, slots=True)
 class Formule:
-    """Une formule lue : nombre d'atomes de chaque élément et charge.
+    """Une formule lue : nombre d'atomes de chaque élément, charge, et phase si elle est écrite.
 
     ``composition`` garde l'ordre de première apparition des symboles :
     ``Formule.lire("CH3COOH").composition == (("C", 2), ("H", 4), ("O", 2))``.
+    ``texte`` est la formule sans sa phase ; ``str(f)`` la reconstruit avec.
     """
 
     texte: str
     composition: tuple[tuple[str, int], ...]
     charge: int = 0
+    phase: str | None = None
+    """``"s"``, ``"l"``, ``"g"`` ou ``"aq"`` (voir ``PHASES``) ; ``None`` si rien n'est écrit."""
+
+    def __post_init__(self) -> None:
+        if self.phase is not None and self.phase not in PHASES:
+            raise ValueError(f"phase inconnue : {self.phase!r} (attendu : {', '.join(PHASES)})")
 
     @classmethod
     def lire(cls, texte: str, tableau: TableauPeriodique | None = None) -> "Formule":
@@ -67,7 +87,7 @@ class Formule:
         return AnalyseurFormule(tableau).analyser(texte)
 
     def __str__(self) -> str:
-        return self.texte
+        return self.texte + (f"({self.phase})" if self.phase else "")
 
     def nombre(self, symbole: str) -> int:
         """Nombre d'atomes de l'élément ``symbole`` (0 s'il est absent)."""
@@ -126,8 +146,12 @@ class AnalyseurFormule:
         self._pos = 0
 
     def analyser(self, texte: str) -> Formule:
-        """Analyse une formule complète, hydrates et charge compris."""
-        self._texte = texte.strip().translate(INDICES)
+        """Analyse une formule complète, hydrates, charge et phase finale compris."""
+        texte = texte.strip()
+        phase = None
+        if (trouve := _PHASE_FINALE.match(texte)) is not None:
+            texte, phase = trouve["formule"].rstrip(), trouve["phase"]
+        self._texte = texte.translate(INDICES)
         self._pos = 0
         if not self._texte:
             raise FormuleInvalide("formule vide")
@@ -145,7 +169,7 @@ class AnalyseurFormule:
                 self._erreur("séparateur ou fin de formule attendu")
             self._pos += 1
             self._espaces()
-        return Formule(texte=texte.strip(), composition=tuple(total.items()), charge=charge)
+        return Formule(texte=texte, composition=tuple(total.items()), charge=charge, phase=phase)
 
     # Grammaire -----------------------------------------------------------------
 

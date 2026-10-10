@@ -33,11 +33,12 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le
   `tableau_periodique()` ; accès par Z, symbole ou nom, `filtrer`, `valeurs`,
   `normaliser` ; températures en °C (`theta_fusion`…), caractère métallique.
 - `pychimie.formules` : analyseur de formules brutes (parenthèses imbriquées,
-  hydrates, charges, indices et exposants Unicode), masse molaire, fractions
-  massiques, notation de Hill.
-- `pychimie.composes` : `Compose`, une formule et sa phase (« H2O(l) »).
-- `pychimie.solutions` : masse à peser, volume à prélever, solution du commerce
-  (titre massique et densité).
+  hydrates, charges, indices et exposants Unicode, phase finale `(s)`, `(l)`, `(g)`
+  ou `(aq)` gardée dans `Formule.phase`), masse molaire, fractions massiques,
+  notation de Hill.
+- `pychimie.preparation` : `Preparation` (masse à peser, volume à prélever, solution
+  du commerce : titre massique et densité) — nommée ainsi pour ne pas se confondre
+  avec `titrages.Solution`, qui décrit une solution par ses couples acide-base.
 - `pychimie.periodikz` : `TableauTikz` (cases, ombrage, symboles en hyperliens
   vers Wikipédia FR, informations, légende).
 - `pychimie.pgfperiodictable` : schémas `\pgfPTnewColorScheme` pour le paquet
@@ -90,6 +91,8 @@ Par rapport à `chimie/atomes.py`, `chimie/periodikz.py` et `chimie/atomes.csv` 
 - `exemples/titrages/` et `tests/test_migration_titrages.py`, qui ne concernaient que
   le paquet `titrages` : déposés dans son dépôt (`examples/07_…` à `11_…`,
   `tests/test_migration_chimie.py`), avec la dépendance de développement `titrages`.
+- `__all__` ne reprend plus `ARTICLES_WIKIPEDIA`, `CARACTERES`, `PHASES`, `RHO_EAU`
+  ni `DonneesThermo`, que rien n'appelait : ils restent dans leurs modules.
 - Les sorties TikZ des exemples (`exemples/periodikz/simple_metaux.tex`,
   `schemas_pgfpt.tex`) ne sont plus suivies par git : les scripts les régénèrent.
 - `chimie/thermochimie.py`.

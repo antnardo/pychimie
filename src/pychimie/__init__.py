@@ -1,4 +1,4 @@
-"""Chimie pour la classe : équilibres, éléments, formules, solutions, tableau périodique.
+"""Chimie pour la classe : équilibres, éléments, formules, préparations, tableau périodique.
 
 Thermochimie des équilibres : avancement, Q(ξ), K°(T), G(ξ), rupture, déplacements.
 
@@ -17,20 +17,12 @@ Thermochimie des équilibres : avancement, Q(ξ), K°(T), G(ξ), rupture, dépla
 249.68
 """
 
-from pychimie.composes import PHASES, Compose
 from pychimie.deplacements import Balayage, Perturbation, balayage, perturber
-from pychimie.donnees import DonneesThermo, TableThermo, table_thermo
-from pychimie.elements import (
-    CARACTERES,
-    FAMILLES,
-    Element,
-    TableauPeriodique,
-    element,
-    tableau_periodique,
-)
+from pychimie.donnees import TableThermo, table_thermo
+from pychimie.elements import FAMILLES, Element, TableauPeriodique, element, tableau_periodique
 from pychimie.equation import Constituant, Equation
 from pychimie.formules import AnalyseurFormule, Formule, FormuleInvalide, masse_molaire
-from pychimie.periodikz import ARTICLES_WIKIPEDIA, TableauTikz, coordonnees, url_wikipedia
+from pychimie.periodikz import TableauTikz, coordonnees, url_wikipedia
 from pychimie.pgfperiodictable import (
     BLANC,
     GRIS,
@@ -39,33 +31,27 @@ from pychimie.pgfperiodictable import (
     schema_categories,
     schema_degrade,
 )
+from pychimie.preparation import Preparation, masse_a_peser, volume_a_prelever
 from pychimie.reaction import Reaction
-from pychimie.solutions import RHO_EAU, Solution, masse_a_peser, volume_a_prelever
 from pychimie.systeme import EtatFinal, RuptureEquilibre, Systeme
 
 __all__ = [
-    "ARTICLES_WIKIPEDIA",
     "BLANC",
-    "CARACTERES",
     "FAMILLES",
     "GRIS",
-    "PHASES",
-    "RHO_EAU",
     "AnalyseurFormule",
     "Balayage",
-    "Compose",
     "Constituant",
     "Couleur",
-    "DonneesThermo",
     "Element",
     "Equation",
     "EtatFinal",
     "Formule",
     "FormuleInvalide",
     "Perturbation",
+    "Preparation",
     "Reaction",
     "RuptureEquilibre",
-    "Solution",
     "Systeme",
     "TableThermo",
     "TableauPeriodique",

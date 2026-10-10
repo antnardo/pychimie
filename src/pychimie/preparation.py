@@ -3,8 +3,10 @@
 Les calculs de la paillasse — quelle masse peser, quel volume prélever, quelle
 concentration a l'acide sulfurique à 96 % du flacon — reposent tous sur la masse
 molaire du soluté, que :mod:`pychimie.formules` calcule depuis sa formule. Les
-équilibres en solution (pH, titrages) relèvent du paquet ``titrages`` et ne sont pas
-repris ici.
+équilibres en solution (pH, titrages) relèvent du paquet ``titrages``, dont la classe
+``Solution`` décrit une solution par ses couples acide-base : ici une
+:class:`Preparation` est une solution à préparer, décrite par son soluté et sa
+concentration.
 
 Unités de la chimie des solutions, plutôt que du SI : concentrations en mol/L,
 concentrations massiques en g/L, volumes en L, masses en g. La densité est celle
@@ -17,7 +19,7 @@ from pychimie.formules import Formule
 
 __all__ = [
     "RHO_EAU",
-    "Solution",
+    "Preparation",
     "masse_a_peser",
     "volume_a_prelever",
 ]
@@ -52,8 +54,8 @@ def volume_a_prelever(
 
 
 @dataclass(frozen=True, slots=True)
-class Solution:
-    """Une solution d'un soluté, décrite par sa concentration en quantité de matière.
+class Preparation:
+    """Une solution à préparer : un soluté et sa concentration en quantité de matière.
 
     ``densite`` n'est connue que pour une solution du commerce : c'est elle qui relie
     le titre massique à la concentration.
@@ -64,12 +66,12 @@ class Solution:
     densite: float | None = None
 
     @classmethod
-    def molaire(cls, solute: str | Formule, concentration: float) -> "Solution":
+    def molaire(cls, solute: str | Formule, concentration: float) -> "Preparation":
         """Solution de ``concentration`` mol/L."""
         return cls(_formule(solute), concentration)
 
     @classmethod
-    def massique(cls, solute: str | Formule, concentration_massique: float) -> "Solution":
+    def massique(cls, solute: str | Formule, concentration_massique: float) -> "Preparation":
         """Solution de concentration massique donnée, en g/L."""
         formule = _formule(solute)
         return cls(formule, concentration_massique / formule.masse_molaire())
@@ -77,11 +79,11 @@ class Solution:
     @classmethod
     def commerciale(
         cls, solute: str | Formule, titre_massique: float, densite: float
-    ) -> "Solution":
+    ) -> "Preparation":
         """Solution du commerce, d'après l'étiquette : titre massique w et densité d.
 
         c = w × d × ρ_eau / M : 1 L de solution pèse d × 1000 g, dont la fraction w de
-        soluté. ``Solution.commerciale("H2SO4", 0.96, 1.84)`` : 18,0 mol/L.
+        soluté. ``Preparation.commerciale("H2SO4", 0.96, 1.84)`` : 18,0 mol/L.
         """
         if not 0 < titre_massique <= 1:
             raise ValueError("le titre massique est une fraction, entre 0 et 1")
@@ -114,12 +116,16 @@ class Solution:
         """Volume (L) qui contient ``quantite`` mol de soluté."""
         return quantite / self.concentration
 
-    def diluee(self, facteur: float) -> "Solution":
+    def diluee(self, facteur: float) -> "Preparation":
         """La solution diluée ``facteur`` fois ; la densité n'est plus connue."""
         if facteur < 1:
             raise ValueError("le facteur de dilution vaut au moins 1")
-        return Solution(self.solute, self.concentration / facteur)
+        return Preparation(self.solute, self.concentration / facteur)
+
+    def masse_a_peser(self, volume: float) -> float:
+        """Masse (g) du soluté solide à peser pour ``volume`` L de cette solution."""
+        return masse_a_peser(self.solute, self.concentration, volume)
 
     def volume_a_prelever(self, concentration: float, volume: float) -> float:
-        """Volume (L) à prélever pour ``volume`` L à ``concentration`` mol/L."""
+        """Volume (L) à prélever de cette solution pour ``volume`` L à ``concentration`` mol/L."""
         return volume_a_prelever(self.concentration, concentration, volume)

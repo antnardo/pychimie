@@ -3,7 +3,7 @@
 python preparation.py
 """
 
-from pychimie import Formule, Solution, element, masse_a_peser, masse_molaire
+from pychimie import Formule, Preparation, element, masse_a_peser, masse_molaire
 
 for texte in ("H2O", "H2SO4", "Ca(OH)2", "CuSO4·5H2O", "K4[Fe(CN)6]", "SO₄²⁻"):
     f = Formule.lire(texte)
@@ -20,7 +20,7 @@ m = masse_a_peser("CuSO4·5H2O", 0.10, 0.100)
 print(f"\nPeser {m:.3f} g de CuSO4·5H2O pour 100 mL à 0,10 mol/L")
 
 # 250 mL d'acide sulfurique à 0,50 mol/L, à partir de l'acide du commerce
-commerce = Solution.commerciale("H2SO4", titre_massique=0.96, densite=1.84)
+commerce = Preparation.commerciale("H2SO4", titre_massique=0.96, densite=1.84)
 V = commerce.volume_a_prelever(0.50, 0.250)
 print(
     f"H2SO4 à 96 % (d = 1,84) : {commerce.concentration:.1f} mol/L ; "

@@ -230,8 +230,8 @@ uv run --group donnees python scripts/generer_elements.py
 
 Un `Systeme` évolue par **une seule** réaction. Les sujets qui couplent plusieurs
 équilibres — la réduction de FeO par CO en présence de l'équilibre de Boudouard
-(`Exercices/Exos/ThermoChimie/TC-E08` : deux constantes à 1000 K, un volume fixé, les
-volumes critiques où un solide disparaît) — demandent un vecteur d'avancements
+(deux constantes à 1000 K, un volume fixé, les volumes critiques où un solide
+disparaît) — demandent un vecteur d'avancements
 (ξ₁, …, ξₖ) : les quantités deviennent nᵢ = nᵢ,₀ + Σⱼ νᵢⱼ ξⱼ, l'état final est le
 minimum de G(ξ₁, …, ξₖ) sur le polytope où toutes les quantités restent positives, et
 une rupture d'équilibre est l'arrivée sur une face de ce polytope. L'extension

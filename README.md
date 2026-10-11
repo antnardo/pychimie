@@ -160,6 +160,14 @@ couples acide-base : les équilibres en solution (pH, titrages) relèvent de ce 
 
 ### Tableau périodique en TikZ
 
+![Tableau périodique ombré selon l'électronégativité de Pauling, avec sa barre d'échelle ; les éléments sans valeur sont en pointillé](docs/images/tableau_ombrage_chi.png)
+
+![Tableau périodique coloré par famille, masses molaires et symboles en hyperliens, avec sa légende](docs/images/tableau_simple_metaux.png)
+
+Ces deux tableaux sortent des gabarits `Tableau_ombrage_chi.tex` et
+`Tableau_simple_metaux.tex` de `exemples/periodikz/`, compilés par LuaLaTeX sur ce que
+`TableauTikz` écrit (`ombrage_chi.py`, `simple_metaux.py`).
+
 `TableauTikz` produit, élément par élément, les commandes qu'un gabarit TikZ met en
 forme. Chaque méthode ajoute une couche pour les 118 éléments, dans l'ordre d'appel :
 

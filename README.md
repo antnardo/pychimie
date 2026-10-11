@@ -4,7 +4,6 @@ Thermochimie (avancement, équilibre, rupture), données atomiques et tableau p�
 
 Les équilibres en solution (pH, titrages pH-métriques, conductimétriques et
 potentiométriques) relèvent du paquet [titrages](https://github.com/antnardo/titrages).
-Le paquet reprend, réécrit, un module privé `chimie` (2020-2024).
 
 ## Installation
 
@@ -23,7 +22,7 @@ LuaLaTeX, siunitx et hyperref.
 
 Le module de thermochimie suit le cours de CPGE : une réaction, son K°(T), et un système
 qui évolue par cette réaction, de l'état initial à l'état final — équilibre ou rupture
-d'équilibre. Il remplace l'ancien `chimie.thermochimie.Reaction`.
+d'équilibre.
 
 ```python
 from pychimie import Reaction, Systeme, perturber
@@ -39,7 +38,7 @@ perturber(s, P=300).sens  # +1 : une hausse de P déplace vers NH₃
 ### Réaction et K°(T)
 
 - `Reaction(équation, DrH0=…, DrS0=…)` : les valeurs d'un énoncé. Elles sont
-  obligatoires — l'ancien code prenait 1 J/mol et 1 J/K/mol quand on les oubliait.
+  obligatoires.
 - `Reaction.depuis_tables(équation)` : ΔrH° et ΔrS° par la loi de Hess, à partir de la
   table de `src/pychimie/donnees/` ; `kirchhoff=True` garde ΔrC°p.
 - `Reaction.depuis_K0(équation, K0, T=…, DrH0=…)` : K° à une température, et la loi de

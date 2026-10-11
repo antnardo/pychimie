@@ -20,3 +20,7 @@ build/
 exemples/periodikz/*.tex
 !exemples/periodikz/Tableau_*.tex
 *.atomes.tex
+
+# Réglages locaux de VS Code
+*.code-workspace
+.vscode/
